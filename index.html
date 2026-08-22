@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ナンプレ</title>
 
 <style>
@@ -11,6 +12,7 @@
         --board: #fffaf0;
         --blue: #b8d8e8;
         --blue-dark: #6fa8c2;
+        --selected: #d6edf5;
         --text: #40515a;
         --line: #8aa9b8;
     }
@@ -29,6 +31,7 @@
             BlinkMacSystemFont,
             "Segoe UI",
             sans-serif;
+
         display: flex;
         justify-content: center;
     }
@@ -52,29 +55,42 @@
         font-size: 14px;
     }
 
+    /* ナンプレ盤 */
     .sudoku {
         width: 100%;
         aspect-ratio: 1;
+
         display: grid;
         grid-template-columns: repeat(9, 1fr);
+
         background: var(--board);
+
         border: 3px solid var(--line);
         border-radius: 10px;
+
         overflow: hidden;
+
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
+    /* マス */
     .cell {
         display: flex;
         align-items: center;
         justify-content: center;
+
         font-size: clamp(20px, 6vw, 32px);
         font-weight: 600;
+
         border-right: 1px solid #c7d5da;
         border-bottom: 1px solid #c7d5da;
+
+        cursor: pointer;
+
+        user-select: none;
     }
 
-    /* 3×3ブロックを分かりやすくする */
+    /* 3×3ブロック */
     .cell:nth-child(3n) {
         border-right: 3px solid var(--line);
     }
@@ -88,38 +104,63 @@
         border-bottom: 3px solid var(--line);
     }
 
+    /* 最初から入っている数字 */
     .cell.fixed {
         background: #edf4f6;
         color: #40515a;
+        cursor: default;
     }
 
+    /* 選択中 */
+    .cell.selected {
+        background: var(--selected);
+    }
+
+    /* 数字ボタン */
     .number-panel {
         margin-top: 20px;
+
         display: grid;
         grid-template-columns: repeat(5, 1fr);
+
         gap: 9px;
     }
 
     button {
         border: none;
         border-radius: 12px;
+
         padding: 13px 5px;
+
         font-size: 20px;
         font-weight: 600;
+
         color: var(--text);
         background: var(--blue);
+
         box-shadow: 0 3px 5px rgba(0,0,0,0.08);
+
         cursor: pointer;
+        touch-action: manipulation;
     }
 
     button:active {
         transform: scale(0.96);
     }
 
+    /* 選択中の数字ボタン */
+    button.number-selected {
+        background: var(--blue-dark);
+        color: white;
+    }
+
     .message {
         min-height: 28px;
+
         text-align: center;
+
         margin-top: 18px;
+
         font-size: 16px;
         font-weight: 600;
     }
@@ -127,17 +168,15 @@
     .bottom-buttons {
         display: grid;
         grid-template-columns: 1fr 1fr;
+
         gap: 10px;
+
         margin-top: 8px;
     }
 
     .action {
         background: #d8e8ed;
         font-size: 16px;
-    }
-
-    .selected {
-        background: #d6edf5;
     }
 </style>
 </head>
@@ -147,35 +186,55 @@
 <div class="app">
 
     <h1>🧩 ナンプレ</h1>
-    <div class="subtitle">Sudoku</div>
+
+    <div class="subtitle">
+        Sudoku
+    </div>
 
     <div id="sudoku" class="sudoku"></div>
 
+    <!-- 数字ボタン -->
     <div id="numberPanel" class="number-panel">
-        <button onclick="inputNumber(1)">1</button>
-        <button onclick="inputNumber(2)">2</button>
-        <button onclick="inputNumber(3)">3</button>
-        <button onclick="inputNumber(4)">4</button>
-        <button onclick="inputNumber(5)">5</button>
-        <button onclick="inputNumber(6)">6</button>
-        <button onclick="inputNumber(7)">7</button>
-        <button onclick="inputNumber(8)">8</button>
-        <button onclick="inputNumber(9)">9</button>
-        <button onclick="clearCell()">消す</button>
+
+        <button class="number-button" data-number="1" onclick="selectNumber(1)">1</button>
+        <button class="number-button" data-number="2" onclick="selectNumber(2)">2</button>
+        <button class="number-button" data-number="3" onclick="selectNumber(3)">3</button>
+        <button class="number-button" data-number="4" onclick="selectNumber(4)">4</button>
+        <button class="number-button" data-number="5" onclick="selectNumber(5)">5</button>
+
+        <button class="number-button" data-number="6" onclick="selectNumber(6)">6</button>
+        <button class="number-button" data-number="7" onclick="selectNumber(7)">7</button>
+        <button class="number-button" data-number="8" onclick="selectNumber(8)">8</button>
+        <button class="number-button" data-number="9" onclick="selectNumber(9)">9</button>
+
+        <button id="clearButton" onclick="selectClear()">消す</button>
+
     </div>
 
     <div id="message" class="message"></div>
 
     <div class="bottom-buttons">
-        <button class="action" onclick="checkAnswer()">答え合わせ</button>
-        <button class="action" onclick="newGame()">新しい問題</button>
+
+        <button class="action" onclick="checkAnswer()">
+            答え合わせ
+        </button>
+
+        <button class="action" onclick="newGame()">
+            新しい問題
+        </button>
+
     </div>
 
 </div>
 
+
 <script>
 
-const puzzle = [
+/* ========================================
+   最初から入っている問題
+======================================== */
+
+const originalPuzzle = [
     [5,3,0,0,7,0,0,0,0],
     [6,0,0,1,9,5,0,0,0],
     [0,9,8,0,0,0,0,6,0],
@@ -188,6 +247,11 @@ const puzzle = [
     [0,0,0,4,1,9,0,0,5],
     [0,0,0,0,8,0,0,7,9]
 ];
+
+
+/* ========================================
+   正解
+======================================== */
 
 const solution = [
     [5,3,4,6,7,8,9,1,2],
@@ -203,83 +267,232 @@ const solution = [
     [3,4,5,2,8,6,1,7,9]
 ];
 
-let selectedCell = null;
+
+/* ========================================
+   現在の盤面
+
+   originalPuzzle → 最初から入っている数字
+   board → プレイヤーが入力した数字を含む現在の盤面
+======================================== */
+
+let board = originalPuzzle.map(row => [...row]);
+
+
+/* ========================================
+   現在選択している数字
+
+   例：
+   5をタップ
+   ↓
+   selectedNumber = 5
+======================================== */
+
+let selectedNumber = null;
+
+
+/* 「消す」が選択されているか */
+let clearMode = false;
+
+
+/* ========================================
+   ナンプレ盤を作る
+======================================== */
 
 function createBoard() {
 
-    const board = document.getElementById("sudoku");
-    board.innerHTML = "";
+    const sudoku = document.getElementById("sudoku");
+
+    sudoku.innerHTML = "";
 
     for (let row = 0; row < 9; row++) {
 
         for (let col = 0; col < 9; col++) {
 
             const cell = document.createElement("div");
-            cell.className = "cell";
 
-            if (puzzle[row][col] !== 0) {
-                cell.textContent = puzzle[row][col];
-                cell.classList.add("fixed");
-            }
+            cell.className = "cell";
 
             cell.dataset.row = row;
             cell.dataset.col = col;
 
+
+            /* 最初から入っている数字 */
+
+            if (originalPuzzle[row][col] !== 0) {
+
+                cell.textContent = originalPuzzle[row][col];
+
+                cell.classList.add("fixed");
+
+            }
+
+
+            /* プレイヤーが入力した数字 */
+
+            else if (board[row][col] !== 0) {
+
+                cell.textContent = board[row][col];
+
+            }
+
+
+            /* マスをタップ */
+
             cell.addEventListener("click", function() {
 
-                if (puzzle[row][col] !== 0) {
+                /* 最初から入っている数字は変更できない */
+
+                if (originalPuzzle[row][col] !== 0) {
+
+                    showMessage("この数字は最初から入っている数字だよ");
+
                     return;
                 }
 
-                document.querySelectorAll(".cell")
-                    .forEach(c => c.classList.remove("selected"));
 
-                cell.classList.add("selected");
+                /* 選択した数字を入力 */
 
-                selectedCell = {
-                    row: row,
-                    col: col,
-                    element: cell
-                };
+                if (selectedNumber !== null) {
+
+                    board[row][col] = selectedNumber;
+
+                    cell.textContent = selectedNumber;
+
+                    showMessage("");
+
+                    highlightCell(cell);
+
+                    return;
+                }
+
+
+                /* 消すモード */
+
+                if (clearMode) {
+
+                    board[row][col] = 0;
+
+                    cell.textContent = "";
+
+                    showMessage("");
+
+                    highlightCell(cell);
+
+                    return;
+                }
+
+
+                /* 何も選択されていない */
+
+                highlightCell(cell);
+
+                showMessage("上の数字を選んでからマスをタップしてね");
 
             });
 
-            board.appendChild(cell);
+
+            sudoku.appendChild(cell);
         }
     }
 }
 
-function inputNumber(number) {
 
-    if (!selectedCell) {
-        showMessage("入力したいマスを選んでね");
-        return;
+/* ========================================
+   数字を選択する
+======================================== */
+
+function selectNumber(number) {
+
+    selectedNumber = number;
+
+    clearMode = false;
+
+
+    /* 数字ボタンの表示をリセット */
+
+    document.querySelectorAll(".number-button")
+        .forEach(button => {
+
+            button.classList.remove("number-selected");
+
+        });
+
+
+    /* 選択した数字を強調 */
+
+    const selectedButton =
+        document.querySelector(
+            `.number-button[data-number="${number}"]`
+        );
+
+    if (selectedButton) {
+
+        selectedButton.classList.add("number-selected");
+
     }
 
-    const row = selectedCell.row;
-    const col = selectedCell.col;
 
-    puzzle[row][col] = number;
-    selectedCell.element.textContent = number;
+    /* 消すボタンの選択解除 */
 
-    showMessage("");
+    document
+        .getElementById("clearButton")
+        .classList.remove("number-selected");
+
+
+    showMessage(`${number}を選択中。入れたいマスをタップしてね`);
 }
 
-function clearCell() {
 
-    if (!selectedCell) {
-        showMessage("消したいマスを選んでね");
-        return;
-    }
+/* ========================================
+   消すモード
+======================================== */
 
-    const row = selectedCell.row;
-    const col = selectedCell.col;
+function selectClear() {
 
-    puzzle[row][col] = 0;
-    selectedCell.element.textContent = "";
+    selectedNumber = null;
 
-    showMessage("");
+    clearMode = true;
+
+
+    /* 数字ボタンの選択解除 */
+
+    document.querySelectorAll(".number-button")
+        .forEach(button => {
+
+            button.classList.remove("number-selected");
+
+        });
+
+
+    document
+        .getElementById("clearButton")
+        .classList.add("number-selected");
+
+
+    showMessage("消したいマスをタップしてね");
 }
+
+
+/* ========================================
+   マスを選択状態にする
+======================================== */
+
+function highlightCell(cell) {
+
+    document.querySelectorAll(".cell")
+        .forEach(c => {
+
+            c.classList.remove("selected");
+
+        });
+
+    cell.classList.add("selected");
+}
+
+
+/* ========================================
+   答え合わせ
+======================================== */
 
 function checkAnswer() {
 
@@ -287,44 +500,77 @@ function checkAnswer() {
 
         for (let col = 0; col < 9; col++) {
 
-            if (puzzle[row][col] !== solution[row][col]) {
+            /*
+             * 空欄がある場合
+             */
+
+            if (board[row][col] === 0) {
+
+                showMessage("まだ空いているマスがあるよ");
+
+                return;
+            }
+
+
+            /*
+             * 間違いがある場合
+             */
+
+            if (board[row][col] !== solution[row][col]) {
+
                 showMessage("まだ間違っているところがあるよ 🤔");
+
                 return;
             }
         }
     }
 
+
+    /* 全問正解 */
+
     showMessage("🎉 正解！おめでとう！");
 }
 
-function showMessage(text) {
-    document.getElementById("message").textContent = text;
-}
+
+/* ========================================
+   新しい問題
+
+   第1号では同じ問題をリセット
+======================================== */
 
 function newGame() {
 
-    const original = [
-        [5,3,0,0,7,0,0,0,0],
-        [6,0,0,1,9,5,0,0,0],
-        [0,9,8,0,0,0,0,6,0],
-        [8,0,0,0,6,0,0,0,3],
-        [4,0,0,8,0,3,0,0,1],
-        [7,0,0,0,2,0,0,0,6],
-        [0,6,0,0,0,0,2,8,0],
-        [0,0,0,4,1,9,0,0,5],
-        [0,0,0,0,8,0,0,7,9]
-    ];
+    board = originalPuzzle.map(row => [...row]);
 
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            puzzle[row][col] = original[row][col];
-        }
-    }
+    selectedNumber = null;
 
-    selectedCell = null;
+    clearMode = false;
+
+
+    /* ボタンの選択状態を解除 */
+
+    document.querySelectorAll(".number-button")
+        .forEach(button => {
+
+            button.classList.remove("number-selected");
+
+        });
+
+
+    document
+        .getElementById("clearButton")
+        .classList.remove("number-selected");
+
+
     showMessage("");
+
     createBoard();
 }
+
+
+/* ========================================
+   最初に盤面を表示
+======================================== */
 
 createBoard();
 
