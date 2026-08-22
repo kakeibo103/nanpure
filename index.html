@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ナンプレ</title>
+
+<style>
+    :root {
+        --bg: #f5eedf;
+        --board: #fffaf0;
+        --blue: #b8d8e8;
+        --blue-dark: #6fa8c2;
+        --text: #40515a;
+        --line: #8aa9b8;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+        display: flex;
+        justify-content: center;
+    }
+
+    .app {
+        width: min(100%, 520px);
+        padding: 24px 14px 40px;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 5px 0 8px;
+        font-size: 30px;
+        letter-spacing: 3px;
+    }
+
+    .subtitle {
+        text-align: center;
+        margin-bottom: 22px;
+        opacity: 0.7;
+        font-size: 14px;
+    }
+
+    .sudoku {
+        width: 100%;
+        aspect-ratio: 1;
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        background: var(--board);
+        border: 3px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(20px, 6vw, 32px);
+        font-weight: 600;
+        border-right: 1px solid #c7d5da;
+        border-bottom: 1px solid #c7d5da;
+    }
+
+    /* 3×3ブロックを分かりやすくする */
+    .cell:nth-child(3n) {
+        border-right: 3px solid var(--line);
+    }
+
+    .cell:nth-child(9n) {
+        border-right: none;
+    }
+
+    .cell:nth-child(n+19):nth-child(-n+27),
+    .cell:nth-child(n+46):nth-child(-n+54) {
+        border-bottom: 3px solid var(--line);
+    }
+
+    .cell.fixed {
+        background: #edf4f6;
+        color: #40515a;
+    }
+
+    .number-panel {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 9px;
+    }
+
+    button {
+        border: none;
+        border-radius: 12px;
+        padding: 13px 5px;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text);
+        background: var(--blue);
+        box-shadow: 0 3px 5px rgba(0,0,0,0.08);
+        cursor: pointer;
+    }
+
+    button:active {
+        transform: scale(0.96);
+    }
+
+    .message {
+        min-height: 28px;
+        text-align: center;
+        margin-top: 18px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .bottom-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .action {
+        background: #d8e8ed;
+        font-size: 16px;
+    }
+
+    .selected {
+        background: #d6edf5;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>🧩 ナンプレ</h1>
+    <div class="subtitle">Sudoku</div>
+
+    <div id="sudoku" class="sudoku"></div>
+
+    <div id="numberPanel" class="number-panel">
+        <button onclick="inputNumber(1)">1</button>
+        <button onclick="inputNumber(2)">2</button>
+        <button onclick="inputNumber(3)">3</button>
+        <button onclick="inputNumber(4)">4</button>
+        <button onclick="inputNumber(5)">5</button>
+        <button onclick="inputNumber(6)">6</button>
+        <button onclick="inputNumber(7)">7</button>
+        <button onclick="inputNumber(8)">8</button>
+        <button onclick="inputNumber(9)">9</button>
+        <button onclick="clearCell()">消す</button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="bottom-buttons">
+        <button class="action" onclick="checkAnswer()">答え合わせ</button>
+        <button class="action" onclick="newGame()">新しい問題</button>
+    </div>
+
+</div>
+
+<script>
+
+const puzzle = [
+    [5,3,0,0,7,0,0,0,0],
+    [6,0,0,1,9,5,0,0,0],
+    [0,9,8,0,0,0,0,6,0],
+
+    [8,0,0,0,6,0,0,0,3],
+    [4,0,0,8,0,3,0,0,1],
+    [7,0,0,0,2,0,0,0,6],
+
+    [0,6,0,0,0,0,2,8,0],
+    [0,0,0,4,1,9,0,0,5],
+    [0,0,0,0,8,0,0,7,9]
+];
+
+const solution = [
+    [5,3,4,6,7,8,9,1,2],
+    [6,7,2,1,9,5,3,4,8],
+    [1,9,8,3,4,2,5,6,7],
+
+    [8,5,9,7,6,1,4,2,3],
+    [4,2,6,8,5,3,7,9,1],
+    [7,1,3,9,2,4,8,5,6],
+
+    [9,6,1,5,3,7,2,8,4],
+    [2,8,7,4,1,9,6,3,5],
+    [3,4,5,2,8,6,1,7,9]
+];
+
+let selectedCell = null;
+
+function createBoard() {
+
+    const board = document.getElementById("sudoku");
+    board.innerHTML = "";
+
+    for (let row = 0; row < 9; row++) {
+
+        for (let col = 0; col < 9; col++) {
+
+            const cell = document.createElement("div");
+            cell.className = "cell";
+
+            if (puzzle[row][col] !== 0) {
+                cell.textContent = puzzle[row][col];
+                cell.classList.add("fixed");
+            }
+
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+
+            cell.addEventListener("click", function() {
+
+                if (puzzle[row][col] !== 0) {
+                    return;
+                }
+
+                document.querySelectorAll(".cell")
+                    .forEach(c => c.classList.remove("selected"));
+
+                cell.classList.add("selected");
+
+                selectedCell = {
+                    row: row,
+                    col: col,
+                    element: cell
+                };
+
+            });
+
+            board.appendChild(cell);
+        }
+    }
+}
+
+function inputNumber(number) {
+
+    if (!selectedCell) {
+        showMessage("入力したいマスを選んでね");
+        return;
+    }
+
+    const row = selectedCell.row;
+    const col = selectedCell.col;
+
+    puzzle[row][col] = number;
+    selectedCell.element.textContent = number;
+
+    showMessage("");
+}
+
+function clearCell() {
+
+    if (!selectedCell) {
+        showMessage("消したいマスを選んでね");
+        return;
+    }
+
+    const row = selectedCell.row;
+    const col = selectedCell.col;
+
+    puzzle[row][col] = 0;
+    selectedCell.element.textContent = "";
+
+    showMessage("");
+}
+
+function checkAnswer() {
+
+    for (let row = 0; row < 9; row++) {
+
+        for (let col = 0; col < 9; col++) {
+
+            if (puzzle[row][col] !== solution[row][col]) {
+                showMessage("まだ間違っているところがあるよ 🤔");
+                return;
+            }
+        }
+    }
+
+    showMessage("🎉 正解！おめでとう！");
+}
+
+function showMessage(text) {
+    document.getElementById("message").textContent = text;
+}
+
+function newGame() {
+
+    const original = [
+        [5,3,0,0,7,0,0,0,0],
+        [6,0,0,1,9,5,0,0,0],
+        [0,9,8,0,0,0,0,6,0],
+        [8,0,0,0,6,0,0,0,3],
+        [4,0,0,8,0,3,0,0,1],
+        [7,0,0,0,2,0,0,0,6],
+        [0,6,0,0,0,0,2,8,0],
+        [0,0,0,4,1,9,0,0,5],
+        [0,0,0,0,8,0,0,7,9]
+    ];
+
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            puzzle[row][col] = original[row][col];
+        }
+    }
+
+    selectedCell = null;
+    showMessage("");
+    createBoard();
+}
+
+createBoard();
+
+</script>
+
+</body>
+</html>
