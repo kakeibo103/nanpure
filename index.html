@@ -1,29 +1,40 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>ナンプレ</title>
 
 <style>
 
+/* ========================================
+   色
+======================================== */
+
 :root {
+
     --bg: #f5eedf;
+
     --board: #fffaf0;
 
     /* 自分で入力 */
     --blue: #b8d8e8;
 
     /* ヒント */
-    --red: #f3b5b5;
+    --red: #efb1b1;
 
-    /* 答え合わせ */
-    --yellow: #f4df91;
+    /* 答え */
+    --yellow: #f1dc91;
 
     --blue-dark: #6fa8c2;
 
     --text: #40515a;
+
     --line: #8aa9b8;
 }
 
@@ -35,6 +46,7 @@
 * {
     box-sizing: border-box;
 }
+
 
 body {
 
@@ -62,31 +74,7 @@ body {
 
     width: min(100%, 520px);
 
-    padding: 24px 14px 40px;
-}
-
-
-h1 {
-
-    text-align: center;
-
-    margin: 5px 0 8px;
-
-    font-size: 30px;
-
-    letter-spacing: 3px;
-}
-
-
-.subtitle {
-
-    text-align: center;
-
-    margin-bottom: 22px;
-
-    opacity: 0.7;
-
-    font-size: 14px;
+    padding: 10px 10px 18px;
 }
 
 
@@ -98,7 +86,7 @@ h1 {
 
     width: 100%;
 
-    aspect-ratio: 1;
+    aspect-ratio: 1 / 1;
 
     display: grid;
 
@@ -113,7 +101,7 @@ h1 {
     overflow: hidden;
 
     box-shadow:
-        0 4px 12px rgba(0,0,0,0.08);
+        0 3px 8px rgba(0,0,0,0.08);
 }
 
 
@@ -129,7 +117,7 @@ h1 {
 
     justify-content: center;
 
-    font-size: clamp(20px, 6vw, 32px);
+    font-size: clamp(20px, 6vw, 31px);
 
     font-weight: 600;
 
@@ -141,21 +129,23 @@ h1 {
 
     user-select: none;
 
-    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 
-/* 3×3ブロック */
+/* 3×3の太い線 */
 
 .cell:nth-child(3n) {
 
     border-right: 3px solid var(--line);
 }
 
+
 .cell:nth-child(9n) {
 
     border-right: none;
 }
+
 
 .cell:nth-child(n+19):nth-child(-n+27),
 .cell:nth-child(n+46):nth-child(-n+54) {
@@ -191,7 +181,7 @@ h1 {
 
 
 /* ========================================
-   ヒント数字
+   ヒント
 ======================================== */
 
 .cell.hint {
@@ -203,7 +193,7 @@ h1 {
 
 
 /* ========================================
-   答え合わせで表示した数字
+   答え合わせ
 ======================================== */
 
 .cell.answer {
@@ -215,7 +205,7 @@ h1 {
 
 
 /* ========================================
-   選択中
+   選択中のマス
 ======================================== */
 
 .cell.selected {
@@ -232,13 +222,13 @@ h1 {
 
 .number-panel {
 
-    margin-top: 20px;
+    margin-top: 10px;
 
     display: grid;
 
     grid-template-columns: repeat(5, 1fr);
 
-    gap: 9px;
+    gap: 6px;
 }
 
 
@@ -246,34 +236,38 @@ button {
 
     border: none;
 
-    border-radius: 12px;
+    border-radius: 9px;
 
-    padding: 13px 5px;
+    padding: 9px 4px;
 
-    font-size: 20px;
+    min-height: 42px;
+
+    font-size: 18px;
 
     font-weight: 600;
 
     color: var(--text);
 
-    background: #b8d8e8;
+    background: var(--blue);
 
     box-shadow:
-        0 3px 5px rgba(0,0,0,0.08);
+        0 2px 4px rgba(0,0,0,0.08);
 
     cursor: pointer;
 
     touch-action: manipulation;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 
 button:active {
 
-    transform: scale(0.96);
+    transform: scale(0.97);
 }
 
 
-/* 選択中 */
+/* 数字選択中 */
 
 button.number-selected {
 
@@ -283,23 +277,94 @@ button.number-selected {
 }
 
 
-/* ========================================
-   ヒントボタン
-======================================== */
+/* 消す */
 
-#hintButton {
+#clearButton {
 
-    background: #e8b6b6;
+    background: #9fc8dc;
+
+    color: white;
 }
 
 
 /* ========================================
-   答え合わせボタン
+   下の3ボタン
+======================================== */
+
+.control-buttons {
+
+    margin-top: 8px;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap: 7px;
+}
+
+
+/* ヒント */
+
+#hintButton {
+
+    background: #efb1b1;
+
+    font-size: 16px;
+}
+
+
+/* 全消し */
+
+#clearAllButton {
+
+    background: #f1dc91;
+
+    font-size: 16px;
+}
+
+
+/* 新しい問題 */
+
+#newGameButton {
+
+    background: #c9e1ea;
+
+    font-size: 16px;
+}
+
+
+/* ========================================
+   ヒント使用回数
+======================================== */
+
+.hint-count {
+
+    text-align: center;
+
+    margin-top: 7px;
+
+    font-size: 13px;
+
+    line-height: 1.2;
+
+    opacity: 0.75;
+}
+
+
+/* ========================================
+   答え合わせ
 ======================================== */
 
 #answerButton {
 
-    background: #eadb9d;
+    width: 100%;
+
+    margin-top: 7px;
+
+    background: var(--yellow);
+
+    font-size: 16px;
 }
 
 
@@ -309,58 +374,89 @@ button.number-selected {
 
 .message {
 
-    min-height: 28px;
+    min-height: 18px;
 
     text-align: center;
 
-    margin-top: 18px;
+    margin-top: 5px;
 
-    font-size: 16px;
+    font-size: 13px;
 
     font-weight: 600;
 }
 
 
 /* ========================================
-   ヒント回数
+   非表示
 ======================================== */
 
-.hint-count {
+.hidden {
 
-    text-align: center;
-
-    margin-top: 8px;
-
-    font-size: 14px;
-
-    opacity: 0.75;
+    display: none !important;
 }
 
 
 /* ========================================
-   下部ボタン
+   スマホ用さらにコンパクト
 ======================================== */
 
-.bottom-buttons {
+@media (max-height: 750px) {
 
-    display: grid;
+    .app {
 
-    grid-template-columns: 1fr 1fr;
+        padding-top: 5px;
 
-    gap: 10px;
-
-    margin-top: 10px;
-}
+        padding-bottom: 8px;
+    }
 
 
-.action {
+    .number-panel {
 
-    font-size: 16px;
+        margin-top: 7px;
 
-    background: #d8e8ed;
+        gap: 5px;
+    }
+
+
+    button {
+
+        min-height: 37px;
+
+        padding: 7px 3px;
+
+        font-size: 17px;
+    }
+
+
+    .control-buttons {
+
+        margin-top: 6px;
+
+        gap: 5px;
+    }
+
+
+    .hint-count {
+
+        margin-top: 5px;
+
+        font-size: 12px;
+    }
+
+
+    .message {
+
+        min-height: 14px;
+
+        margin-top: 3px;
+
+        font-size: 12px;
+    }
+
 }
 
 </style>
+
 </head>
 
 
@@ -369,19 +465,18 @@ button.number-selected {
 <div class="app">
 
 
-    <h1>🧩 ナンプレ</h1>
+    <!-- ==================================
+         ナンプレ
+    =================================== -->
 
-    <div class="subtitle">
-        Sudoku
+    <div id="sudoku"
+         class="sudoku">
     </div>
 
 
-    <!-- ナンプレ -->
-
-    <div id="sudoku" class="sudoku"></div>
-
-
-    <!-- 数字 -->
+    <!-- ==================================
+         数字ボタン
+    =================================== -->
 
     <div class="number-panel">
 
@@ -467,24 +562,67 @@ button.number-selected {
     </div>
 
 
-    <!-- ヒント -->
+    <!-- ==================================
+         ヒント・全消し・新しい問題
+    =================================== -->
 
-    <button
-        id="hintButton"
-        style="width:100%; margin-top:12px;"
-        onclick="useHint()">
+    <div class="control-buttons">
 
-        💡 ヒント
 
-    </button>
+        <button
+            id="hintButton"
+            onclick="useHint()">
 
+            💡 ヒント
+
+        </button>
+
+
+        <button
+            id="clearAllButton"
+            onclick="clearAll()">
+
+            全消し
+
+        </button>
+
+
+        <button
+            id="newGameButton"
+            onclick="newGame()">
+
+            新しい問題
+
+        </button>
+
+    </div>
+
+
+    <!-- ==================================
+         ヒント回数
+    =================================== -->
 
     <div class="hint-count">
 
         ヒント使用回数：
-        <span id="hintCount">0</span> / 3
+        <span id="hintCount">0</span> / 5
 
     </div>
+
+
+    <!-- ==================================
+         答え合わせ
+         最初は非表示
+    =================================== -->
+
+    <button
+        id="answerButton"
+        class="hidden"
+        onclick="checkAnswer()">
+
+        答え合わせ
+
+    </button>
 
 
     <!-- メッセージ -->
@@ -495,32 +633,6 @@ button.number-selected {
     </div>
 
 
-    <!-- 下部 -->
-
-    <div class="bottom-buttons">
-
-
-        <button
-            id="answerButton"
-            class="action"
-            onclick="checkAnswer()">
-
-            答え合わせ
-
-        </button>
-
-
-        <button
-            class="action"
-            onclick="newGame()">
-
-            新しい問題
-
-        </button>
-
-    </div>
-
-
 </div>
 
 
@@ -528,45 +640,84 @@ button.number-selected {
 
 
 /* ========================================
-   問題
+   問題1
 ======================================== */
 
-const originalPuzzle = [
+const puzzle1 = [
 
     [5,3,0,0,7,0,0,0,0],
+
     [6,0,0,1,9,5,0,0,0],
+
     [0,9,8,0,0,0,0,6,0],
 
     [8,0,0,0,6,0,0,0,3],
+
     [4,0,0,8,0,3,0,0,1],
+
     [7,0,0,0,2,0,0,0,6],
 
     [0,6,0,0,0,0,2,8,0],
+
     [0,0,0,4,1,9,0,0,5],
+
     [0,0,0,0,8,0,0,7,9]
 
 ];
 
 
-/* ========================================
-   正解
-======================================== */
-
-const solution = [
+const solution1 = [
 
     [5,3,4,6,7,8,9,1,2],
+
     [6,7,2,1,9,5,3,4,8],
+
     [1,9,8,3,4,2,5,6,7],
 
     [8,5,9,7,6,1,4,2,3],
+
     [4,2,6,8,5,3,7,9,1],
+
     [7,1,3,9,2,4,8,5,6],
 
     [9,6,1,5,3,7,2,8,4],
+
     [2,8,7,4,1,9,6,3,5],
+
     [3,4,5,2,8,6,1,7,9]
 
 ];
+
+
+/* ========================================
+   今後問題を増やすための準備
+======================================== */
+
+const puzzles = [
+
+    {
+        puzzle: puzzle1,
+        solution: solution1
+    }
+
+];
+
+
+/* 現在の問題 */
+
+let currentPuzzleIndex = 0;
+
+
+/* 現在の問題 */
+
+let originalPuzzle =
+    puzzles[currentPuzzleIndex].puzzle;
+
+
+/* 正解 */
+
+let solution =
+    puzzles[currentPuzzleIndex].solution;
 
 
 /* ========================================
@@ -578,19 +729,17 @@ let board =
 
 
 /* ========================================
-   プレイヤー入力の種類
-========================================
+   マスの種類
 
-   ""       = なし
-   "user"   = 自分で入力
-   "hint"   = ヒント
-   "answer" = 答え合わせ
-
+   ""       = 空
+   user     = 自分で入力
+   hint     = ヒント
+   answer   = 答え
 ======================================== */
 
 let cellType =
     Array.from(
-        {length:9},
+        { length: 9 },
         () => Array(9).fill("")
     );
 
@@ -607,24 +756,25 @@ let selectedNumber = null;
 let clearMode = false;
 
 
-/* ヒント使用回数 */
+/* ヒント回数 */
 
 let hintCount = 0;
 
 
-/* 答え合わせ表示中 */
+/* 答え表示中 */
 
 let answerMode = false;
 
 
 /* ========================================
-   盤面作成
+   盤面を作る
 ======================================== */
 
 function createBoard() {
 
     const sudoku =
         document.getElementById("sudoku");
+
 
     sudoku.innerHTML = "";
 
@@ -641,13 +791,11 @@ function createBoard() {
             cell.className = "cell";
 
 
-            cell.dataset.row = row;
-            cell.dataset.col = col;
-
-
             /* 固定数字 */
 
-            if (originalPuzzle[row][col] !== 0) {
+            if (
+                originalPuzzle[row][col] !== 0
+            ) {
 
                 cell.textContent =
                     originalPuzzle[row][col];
@@ -657,29 +805,37 @@ function createBoard() {
             }
 
 
-            /* 入力済み */
+            /* プレイヤーが入力 */
 
-            else if (board[row][col] !== 0) {
+            else if (
+                board[row][col] !== 0
+            ) {
 
                 cell.textContent =
                     board[row][col];
 
 
-                if (cellType[row][col] === "user") {
+                if (
+                    cellType[row][col] === "user"
+                ) {
 
                     cell.classList.add("user");
 
                 }
 
 
-                if (cellType[row][col] === "hint") {
+                if (
+                    cellType[row][col] === "hint"
+                ) {
 
                     cell.classList.add("hint");
 
                 }
 
 
-                if (cellType[row][col] === "answer") {
+                if (
+                    cellType[row][col] === "answer"
+                ) {
 
                     cell.classList.add("answer");
 
@@ -688,11 +844,14 @@ function createBoard() {
             }
 
 
-            /* タップ */
+            /* ==================================
+               マスをタップ
+            ================================== */
 
             cell.addEventListener(
                 "click",
                 function() {
+
 
                     /* 固定数字 */
 
@@ -700,16 +859,12 @@ function createBoard() {
                         originalPuzzle[row][col] !== 0
                     ) {
 
-                        showMessage(
-                            "この数字は変更できないよ"
-                        );
-
                         return;
 
                     }
 
 
-                    /* 答え合わせ表示中 */
+                    /* 答え表示中 */
 
                     if (answerMode) {
 
@@ -720,10 +875,13 @@ function createBoard() {
 
                     /* 数字入力 */
 
-                    if (selectedNumber !== null) {
+                    if (
+                        selectedNumber !== null
+                    ) {
 
                         board[row][col] =
                             selectedNumber;
+
 
                         cellType[row][col] =
                             "user";
@@ -738,12 +896,14 @@ function createBoard() {
                             "answer"
                         );
 
+
                         cell.classList.add(
                             "user"
                         );
 
 
                         highlightCell(cell);
+
 
                         return;
 
@@ -756,9 +916,13 @@ function createBoard() {
 
                         board[row][col] = 0;
 
-                        cellType[row][col] = "";
+
+                        cellType[row][col] =
+                            "";
+
 
                         cell.textContent = "";
+
 
                         cell.classList.remove(
                             "user",
@@ -766,7 +930,9 @@ function createBoard() {
                             "answer"
                         );
 
+
                         highlightCell(cell);
+
 
                         return;
 
@@ -774,10 +940,6 @@ function createBoard() {
 
 
                     highlightCell(cell);
-
-                    showMessage(
-                        "数字を選んでからマスをタップしてね"
-                    );
 
                 }
             );
@@ -793,7 +955,7 @@ function createBoard() {
 
 
 /* ========================================
-   数字選択
+   数字を選択
 ======================================== */
 
 function selectNumber(number) {
@@ -835,10 +997,6 @@ function selectNumber(number) {
             "number-selected"
         );
 
-
-    showMessage(
-        `${number}を選択中。マスをタップしてね`
-    );
 }
 
 
@@ -870,10 +1028,6 @@ function selectClear() {
             "number-selected"
         );
 
-
-    showMessage(
-        "消したいマスをタップしてね"
-    );
 }
 
 
@@ -884,23 +1038,21 @@ function selectClear() {
 function useHint() {
 
 
-    if (answerMode) {
+    /* 5回使用済み */
 
-        showMessage(
-            "答え合わせ表示中です"
-        );
+    if (hintCount >= 5) {
 
         return;
+
     }
 
 
-    if (hintCount >= 3) {
+    /* 答え表示中 */
 
-        showMessage(
-            "ヒントは3回までだよ"
-        );
+    if (answerMode) {
 
         return;
+
     }
 
 
@@ -914,8 +1066,11 @@ function useHint() {
         for (let col = 0; col < 9; col++) {
 
             if (
+
                 originalPuzzle[row][col] === 0 &&
+
                 board[row][col] === 0
+
             ) {
 
                 emptyCells.push({
@@ -930,19 +1085,16 @@ function useHint() {
     }
 
 
-    /* 空欄がない */
+    /* 空欄なし */
 
     if (emptyCells.length === 0) {
 
-        showMessage(
-            "もう全部埋まっているよ！"
-        );
-
         return;
+
     }
 
 
-    /* ランダムに1マス選択 */
+    /* ランダムで1マス */
 
     const target =
         emptyCells[
@@ -954,10 +1106,11 @@ function useHint() {
 
 
     const row = target.row;
+
     const col = target.col;
 
 
-    /* 正解を入れる */
+    /* 正解を入力 */
 
     board[row][col] =
         solution[row][col];
@@ -970,17 +1123,89 @@ function useHint() {
     hintCount++;
 
 
+    /* 表示更新 */
+
     document
         .getElementById("hintCount")
         .textContent = hintCount;
 
 
+    /* 5回になったら答え合わせを表示 */
+
+    if (hintCount >= 5) {
+
+        document
+            .getElementById("answerButton")
+            .classList.remove("hidden");
+
+    }
+
+
     createBoard();
 
+}
 
-    showMessage(
-        "💡 ヒントで1マス埋めたよ！"
-    );
+
+/* ========================================
+   全消し
+======================================== */
+
+function clearAll() {
+
+
+    /* 答え表示中なら解除 */
+
+    answerMode = false;
+
+
+    /* 全入力を消す */
+
+    for (let row = 0; row < 9; row++) {
+
+        for (let col = 0; col < 9; col++) {
+
+
+            if (
+                originalPuzzle[row][col] === 0
+            ) {
+
+                board[row][col] = 0;
+
+                cellType[row][col] = "";
+
+            }
+
+        }
+
+    }
+
+
+    /* 数字選択解除 */
+
+    selectedNumber = null;
+
+    clearMode = false;
+
+
+    document
+        .querySelectorAll(".number-button")
+        .forEach(button => {
+
+            button.classList.remove(
+                "number-selected"
+            );
+
+        });
+
+
+    document
+        .getElementById("clearButton")
+        .classList.remove(
+            "number-selected"
+        );
+
+
+    createBoard();
 
 }
 
@@ -992,9 +1217,7 @@ function useHint() {
 function checkAnswer() {
 
 
-    /* --------------------------------
-       すでに答えを表示している場合
-    -------------------------------- */
+    /* すでに表示中なら消す */
 
     if (answerMode) {
 
@@ -1002,6 +1225,7 @@ function checkAnswer() {
         for (let row = 0; row < 9; row++) {
 
             for (let col = 0; col < 9; col++) {
+
 
                 if (
                     cellType[row][col] ===
@@ -1021,40 +1245,16 @@ function checkAnswer() {
 
         answerMode = false;
 
+
         createBoard();
 
 
-        showMessage(
-            "答え合わせを閉じたよ"
-        );
-
-
         return;
 
     }
 
 
-    /* --------------------------------
-       ヒント3回未満
-    -------------------------------- */
-
-    if (hintCount < 3) {
-
-        showMessage(
-            `答え合わせにはヒントを3回使ってね（現在 ${hintCount}回）`
-        );
-
-        return;
-
-    }
-
-
-    /* --------------------------------
-       全ての空欄を答えで埋める
-    -------------------------------- */
-
-    let filled = false;
-
+    /* 残りを全部正解で埋める */
 
     for (let row = 0; row < 9; row++) {
 
@@ -1062,17 +1262,19 @@ function checkAnswer() {
 
 
             if (
+
                 originalPuzzle[row][col] === 0 &&
+
                 board[row][col] === 0
+
             ) {
 
                 board[row][col] =
                     solution[row][col];
 
+
                 cellType[row][col] =
                     "answer";
-
-                filled = true;
 
             }
 
@@ -1081,28 +1283,10 @@ function checkAnswer() {
     }
 
 
-    /* 答え合わせモード */
-
     answerMode = true;
 
 
     createBoard();
-
-
-    if (filled) {
-
-        showMessage(
-            "🟡 答えを表示したよ"
-        );
-
-    }
-    else {
-
-        showMessage(
-            "すでに全部埋まっているよ！"
-        );
-
-    }
 
 }
 
@@ -1132,23 +1316,31 @@ function highlightCell(cell) {
 
 
 /* ========================================
-   メッセージ
-======================================== */
-
-function showMessage(text) {
-
-    document
-        .getElementById("message")
-        .textContent = text;
-
-}
-
-
-/* ========================================
-   新しいゲーム
+   新しい問題
 ======================================== */
 
 function newGame() {
+
+
+    /* 今は問題1のみ */
+
+    currentPuzzleIndex++;
+
+    if (
+        currentPuzzleIndex >= puzzles.length
+    ) {
+
+        currentPuzzleIndex = 0;
+
+    }
+
+
+    originalPuzzle =
+        puzzles[currentPuzzleIndex].puzzle;
+
+
+    solution =
+        puzzles[currentPuzzleIndex].solution;
 
 
     board =
@@ -1157,7 +1349,7 @@ function newGame() {
 
     cellType =
         Array.from(
-            {length:9},
+            { length: 9 },
             () => Array(9).fill("")
         );
 
@@ -1174,6 +1366,11 @@ function newGame() {
     document
         .getElementById("hintCount")
         .textContent = "0";
+
+
+    document
+        .getElementById("answerButton")
+        .classList.add("hidden");
 
 
     document
@@ -1194,9 +1391,6 @@ function newGame() {
         );
 
 
-    showMessage("");
-
-
     createBoard();
 
 }
@@ -1211,4 +1405,5 @@ createBoard();
 </script>
 
 </body>
+
 </html>
