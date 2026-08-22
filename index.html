@@ -455,6 +455,44 @@ button.number-selected {
 
 }
 
+/* ========================================
+   難易度
+======================================== */
+
+.difficulty {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap: 6px;
+
+    margin-bottom: 7px;
+}
+
+
+.difficulty button {
+
+    min-height: 34px;
+
+    padding: 5px;
+
+    font-size: 15px;
+
+    background: #d8e8ed;
+
+    box-shadow: none;
+}
+
+
+.difficulty button.active {
+
+    background: #8fbfd3;
+
+    color: white;
+}
+      
 </style>
 
 </head>
@@ -463,7 +501,28 @@ button.number-selected {
 <body>
 
 <div class="app">
+      
+<div class="difficulty">
 
+    <button
+        id="easyButton"
+        onclick="setDifficulty('easy')">
+        初級
+    </button>
+
+    <button
+        id="normalButton"
+        onclick="setDifficulty('normal')">
+        中級
+    </button>
+
+    <button
+        id="hardButton"
+        onclick="setDifficulty('hard')">
+        上級
+    </button>
+
+</div>
 
     <!-- ==================================
          ナンプレ
@@ -645,53 +704,442 @@ button.number-selected {
 
 const puzzle1 = [
 
-    [5,3,0,0,7,0,0,0,0],
+ /* ========================================
+   難易度
+======================================== */
 
-    [6,0,0,1,9,5,0,0,0],
-
-    [0,9,8,0,0,0,0,6,0],
-
-    [8,0,0,0,6,0,0,0,3],
-
-    [4,0,0,8,0,3,0,0,1],
-
-    [7,0,0,0,2,0,0,0,6],
-
-    [0,6,0,0,0,0,2,8,0],
-
-    [0,0,0,4,1,9,0,0,5],
-
-    [0,0,0,0,8,0,0,7,9]
-
-];
-
-
-const solution1 = [
-
-    [5,3,4,6,7,8,9,1,2],
-
-    [6,7,2,1,9,5,3,4,8],
-
-    [1,9,8,3,4,2,5,6,7],
-
-    [8,5,9,7,6,1,4,2,3],
-
-    [4,2,6,8,5,3,7,9,1],
-
-    [7,1,3,9,2,4,8,5,6],
-
-    [9,6,1,5,3,7,2,8,4],
-
-    [2,8,7,4,1,9,6,3,5],
-
-    [3,4,5,2,8,6,1,7,9]
-
-];
+let difficulty = "normal";
 
 
 /* ========================================
-   今後問題を増やすための準備
+   難易度ごとの空欄数
 ======================================== */
+
+const difficultySettings = {
+
+    easy: {
+        remove: 38
+    },
+
+    normal: {
+        remove: 48
+    },
+
+    hard: {
+        remove: 56
+    }
+
+};
+
+
+/* ========================================
+   現在の問題
+======================================== */
+
+let originalPuzzle = [];
+
+let solution = [];
+
+
+/* ========================================
+   盤面をコピー
+======================================== */
+
+function copyBoard(board) {
+
+    return board.map(row => [...row]);
+
+}
+
+
+/* ========================================
+   数字をシャッフル
+======================================== */
+
+function shuffle(array) {
+
+    const result = [...array];
+
+
+    for (
+        let i = result.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+
+        [
+            result[i],
+            result[j]
+        ] =
+        [
+            result[j],
+            result[i]
+        ];
+
+    }
+
+
+    return result;
+
+}
+
+
+/* ========================================
+   完成した数独を作る
+======================================== */
+
+function generateSolution() {
+
+
+    const board =
+        Array.from(
+            { length: 9 },
+            () => Array(9).fill(0)
+        );
+
+
+    function isValid(row, col, number) {
+
+
+        /* 横 */
+
+        for (let c = 0; c < 9; c++) {
+
+            if (
+                board[row][c] === number
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        /* 縦 */
+
+        for (let r = 0; r < 9; r++) {
+
+            if (
+                board[r][col] === number
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        /* 3×3 */
+
+        const startRow =
+            Math.floor(row / 3) * 3;
+
+        const startCol =
+            Math.floor(col / 3) * 3;
+
+
+        for (
+            let r = startRow;
+            r < startRow + 3;
+            r++
+        ) {
+
+            for (
+                let c = startCol;
+                c < startCol + 3;
+                c++
+            ) {
+
+                if (
+                    board[r][c] === number
+                ) {
+
+                    return false;
+
+                }
+
+            }
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function solve() {
+
+
+        for (let row = 0; row < 9; row++) {
+
+            for (let col = 0; col < 9; col++) {
+
+
+                if (board[row][col] === 0) {
+
+
+                    const numbers =
+                        shuffle(
+                            [1,2,3,4,5,6,7,8,9]
+                        );
+
+
+                    for (
+                        const number of numbers
+                    ) {
+
+
+                        if (
+                            isValid(
+                                row,
+                                col,
+                                number
+                            )
+                        ) {
+
+
+                            board[row][col] =
+                                number;
+
+
+                            if (solve()) {
+
+                                return true;
+
+                            }
+
+
+                            board[row][col] =
+                                0;
+
+                        }
+
+                    }
+
+
+                    return false;
+
+                }
+
+            }
+
+        }
+
+
+        return true;
+
+    }
+
+
+    solve();
+
+
+    return board;
+
+}
+
+
+/* ========================================
+   問題を作る
+======================================== */
+
+function generatePuzzle() {
+
+
+    /* 完成形を作る */
+
+    solution =
+        generateSolution();
+
+
+    /* コピー */
+
+    originalPuzzle =
+        copyBoard(solution);
+
+
+    const removeCount =
+        difficultySettings[
+            difficulty
+        ].remove;
+
+
+    /* 消すマス */
+
+    const positions = [];
+
+
+    for (let row = 0; row < 9; row++) {
+
+        for (let col = 0; col < 9; col++) {
+
+            positions.push({
+                row: row,
+                col: col
+            });
+
+        }
+
+    }
+
+
+    /* ランダムに並べる */
+
+    const shuffled =
+        shuffle(positions);
+
+
+    /* 指定数だけ消す */
+
+    for (
+        let i = 0;
+        i < removeCount;
+        i++
+    ) {
+
+
+        const position =
+            shuffled[i];
+
+
+        originalPuzzle[
+            position.row
+        ][
+            position.col
+        ] = 0;
+
+    }
+
+}
+
+
+/* ========================================
+   難易度変更
+======================================== */
+
+function setDifficulty(level) {
+
+
+    difficulty = level;
+
+
+    /* ボタン表示 */
+
+    document
+        .querySelectorAll(".difficulty button")
+        .forEach(button => {
+
+            button.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    if (level === "easy") {
+
+        document
+            .getElementById("easyButton")
+            .classList.add("active");
+
+    }
+
+
+    if (level === "normal") {
+
+        document
+            .getElementById("normalButton")
+            .classList.add("active");
+
+    }
+
+
+    if (level === "hard") {
+
+        document
+            .getElementById("hardButton")
+            .classList.add("active");
+
+    }
+
+
+    /* 新しい問題を作る */
+
+    startNewPuzzle();
+
+}
+
+
+/* ========================================
+   新しい問題を開始
+======================================== */
+
+function startNewPuzzle() {
+
+
+    generatePuzzle();
+
+
+    board =
+        copyBoard(originalPuzzle);
+
+
+    cellType =
+        Array.from(
+            { length: 9 },
+            () => Array(9).fill("")
+        );
+
+
+    selectedNumber = null;
+
+    clearMode = false;
+
+    hintCount = 0;
+
+    answerMode = false;
+
+
+    document
+        .getElementById("hintCount")
+        .textContent = "0";
+
+
+    document
+        .getElementById("answerButton")
+        .classList.add("hidden");
+
+
+    document
+        .querySelectorAll(".number-button")
+        .forEach(button => {
+
+            button.classList.remove(
+                "number-selected"
+            );
+
+        });
+
+
+    document
+        .getElementById("clearButton")
+        .classList.remove(
+            "number-selected"
+        );
+
+
+    createBoard();
+
+}
 
 const puzzles = [
 
@@ -1321,16 +1769,7 @@ function highlightCell(cell) {
 
 function newGame() {
 
-
-    /* 今は問題1のみ */
-
-    currentPuzzleIndex++;
-
-    if (
-        currentPuzzleIndex >= puzzles.length
-    ) {
-
-        currentPuzzleIndex = 0;
+  startNewPuzzle();   
 
     }
 
@@ -1390,8 +1829,7 @@ function newGame() {
             "number-selected"
         );
 
-
-    createBoard();
+createBoard();
 
 }
 
@@ -1400,7 +1838,7 @@ function newGame() {
    起動
 ======================================== */
 
-createBoard();
+setDifficulty("normal");  
 
 </script>
 
