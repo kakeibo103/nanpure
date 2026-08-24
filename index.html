@@ -103,15 +103,6 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
   .legend{display:none}
 }
 </style>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#f5eedf">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ナンプレ">
-<link rel="apple-touch-icon" href="icon-192.png">
-
 </head>
 <body>
 <div class="app">
@@ -310,7 +301,6 @@ function generatePuzzle(){
   }
   solution=makeSolution();
   puzzle=solution.map(r=>[...r]);
-  const remove={easy:34,normal:44,hard:50}[difficulty];
   for(const [r,c] of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9])))puzzle[r][c]=0;
 }
 function resetSelection(){
@@ -456,16 +446,5 @@ applyTheme(themeName);
 document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));
 actuallyNewGame();
 </script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(err => {
-      console.warn("Service Worker registration failed:", err);
-    });
-  });
-}
-</script>
-
 </body>
 </html>
