@@ -301,8 +301,13 @@ function generatePuzzle(){
   }
   solution=makeSolution();
   puzzle=solution.map(r=>[...r]);
-  const remove={easy:34,normal:44,hard:50}[difficulty];
-  for(const [r,c] of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9])))puzzle[r][c]=0;
+  const fallbackRemove={easy:34,normal:44,hard:50}[difficulty];
+  let removedFallback=0;
+  for(const [r,c] of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){
+    if(removedFallback>=fallbackRemove) break;
+    puzzle[r][c]=0;
+    removedFallback++;
+  }
 }
 function resetSelection(){
   selectedNumber=null; clearMode=false;
