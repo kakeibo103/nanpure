@@ -1,2342 +1,451 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ナンプレ</title>
-
 <style>
-
-/* ========================================
-   色
-======================================== */
-
-:root {
-
-    --bg: #f5eedf;
-
-    --board: #fffaf0;
-
-    /* 自分で入力 */
-    --user: #b8d8e8;
-
-    /* ヒント */
-    --hint: #efb1b1;
-
-    /* 答え */
-    --answer: #f1dc91;
-
-    /* 選択 */
-    --selected: #72aeca;
-
-    --text: #40515a;
-
-    --line: #8aa9b8;
+:root{
+  --bg:#f5eedf;
+  --board:#fffaf0;
+  --text:#40515a;
+  --line:#88aaba;
+  --user:#b9ddec;
+  --pencil:#d9c4ef;
+  --hint:#efb0b0;
+  --answer:#f1db91;
+  --accent:#4e9bc1;
+  --soft:#d9eaf0;
+  --success:#a9d9b9;
+  --danger:#e9a2a2;
+  --modal:#fffdf7;
 }
-
-
-/* ========================================
-   基本
-======================================== */
-
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+body{min-height:100vh;display:flex;justify-content:center}
+button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;color:var(--text)}
+.app{width:min(100%,560px);padding:8px 10px 14px}
+.header{position:relative;text-align:center;margin-bottom:7px}
+.title-main{font-size:26px;font-weight:800;letter-spacing:3px;line-height:1.05}
+.title-sub{font-size:13px;opacity:.65;margin-top:3px}
+.top-btn{position:absolute;top:0;width:48px;height:42px;border-radius:14px;background:rgba(255,255,255,.58);box-shadow:0 2px 7px rgba(0,0,0,.08);font-size:22px}
+#settingsOpen{left:0}
+#rulesOpen{right:0}
+.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px}
+.difficulty button{min-height:34px;border-radius:9px;background:#d8e8ed;font-weight:700}
+.difficulty button.active{background:var(--accent);color:#fff}
+.sudoku{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));background:var(--board);border:3px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 9px rgba(0,0,0,.08)}
+.cell{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,6vw,34px);font-weight:650;border-right:1px solid #c8d6da;border-bottom:1px solid #c8d6da;user-select:none;cursor:pointer;position:relative}
+.cell.br{border-right:3px solid var(--line)}
+.cell.bb{border-bottom:3px solid var(--line)}
+.cell.fixed{background:var(--board);cursor:default}
+.cell.user{background:var(--user)}
+.cell.pencil{background:var(--pencil)}
+.cell.hint{background:var(--hint);color:#7b3030}
+.cell.answer{background:var(--answer);color:#665415}
+.cell.selected{outline:3px solid var(--accent);outline-offset:-3px}
+.cell.wrong{box-shadow:inset 0 0 0 3px #d95353;background:#f2b4b4}
+.number-panel{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.number-panel button{min-height:40px;border-radius:9px;background:var(--user);font-size:18px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.number-panel button.selected{background:var(--accent);color:#fff}
+#clearButton{background:#9fc8dc;color:#fff}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.action-grid button{min-height:44px;border-radius:10px;font-weight:750}
+#hintButton{background:var(--hint)}
+#pencilButton{background:var(--pencil)}
+#pencilButton.on{box-shadow:inset 0 0 0 3px #8e5fb8}
+#newGameButton{grid-column:1/-1;background:#c9e6d0;font-size:16px}
+.status{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:5px;font-size:12px;opacity:.8}
+#answerButton{width:100%;margin-top:6px;min-height:40px;border-radius:10px;background:var(--answer);font-weight:750}
+.hidden{display:none!important}
+.message{min-height:19px;text-align:center;font-size:13px;font-weight:700;margin-top:4px}
+.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:11px;opacity:.8}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:3px}
+.dot.user{background:var(--user)} .dot.pencil{background:var(--pencil)} .dot.hint{background:var(--hint)} .dot.answer{background:var(--answer)}
+.overlay{position:fixed;inset:0;background:rgba(55,65,70,.35);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal{width:min(100%,500px);max-height:90vh;overflow:auto;background:var(--modal);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-head h2{margin:0;font-size:23px}
+.close{width:38px;height:38px;border-radius:10px;background:#e5edf0;font-size:23px}
+.setting-section{background:#f7f1e6;border-radius:13px;padding:12px;margin-top:10px}
+.setting-section h3{margin:0 0 9px;font-size:16px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0}
+.setting-row select{padding:8px;border:1px solid #cbd7da;border-radius:8px;background:#fff}
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.theme{min-height:55px;border:2px solid transparent;border-radius:10px;background:#fff;text-align:left;padding:8px}
+.theme.active{border-color:var(--accent)}
+.swatches{display:flex;gap:4px;margin-bottom:4px}
+.swatch{width:20px;height:20px;border-radius:50%}
+.rule-list{margin:0;padding-left:22px;line-height:1.75}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions button{flex:1;min-height:42px;border-radius:10px;background:var(--user);font-weight:700}
+.result-icon{font-size:48px;text-align:center;margin-top:2px}
+.result-title{text-align:center;font-size:25px;font-weight:800}
+.result-text{text-align:center;margin:8px 0 14px;line-height:1.6}
+.result-ok{background:var(--success)!important}
+.result-ng{background:var(--danger)!important}
+.confirm-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.confirm-buttons button{min-height:44px;border-radius:10px;font-weight:750}
+#confirmNo{background:#e5ebed}
+#confirmYes{background:var(--accent);color:#fff}
+@media(max-height:760px){
+  .app{padding-top:4px}
+  .header{margin-bottom:4px}
+  .title-main{font-size:23px}
+  .title-sub{font-size:12px}
+  .difficulty{margin-bottom:5px}
+  .difficulty button{min-height:30px}
+  .number-panel{margin-top:5px;gap:5px}
+  .number-panel button{min-height:37px}
+  .action-grid{margin-top:5px}
+  .action-grid button{min-height:39px}
+  .status{margin-top:3px}
+  .legend{display:none}
 }
-
-
-html,
-body {
-
-    margin: 0;
-
-    padding: 0;
-
-    background: var(--bg);
-
-    color: var(--text);
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-}
-
-
-body {
-
-    min-height: 100vh;
-
-    display: flex;
-
-    justify-content: center;
-}
-
-
-.app {
-
-    width: min(100%, 540px);
-
-    padding:
-        8px
-        10px
-        14px;
-}
-
-
-/* ========================================
-   タイトル
-======================================== */
-
-.title {
-
-    text-align: center;
-
-    line-height: 1;
-
-    margin-bottom: 6px;
-}
-
-
-.title-main {
-
-    font-size: 25px;
-
-    font-weight: 700;
-
-    letter-spacing: 3px;
-}
-
-
-.title-sub {
-
-    margin-top: 4px;
-
-    font-size: 13px;
-
-    opacity: 0.65;
-}
-
-
-/* ========================================
-   難易度
-======================================== */
-
-.difficulty {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    gap: 6px;
-
-    margin-bottom: 7px;
-}
-
-
-.difficulty button {
-
-    min-height: 34px;
-
-    padding: 5px;
-
-    font-size: 14px;
-
-    background: #d8e8ed;
-
-    box-shadow: none;
-}
-
-
-.difficulty button.active {
-
-    background: var(--selected);
-
-    color: white;
-}
-
-
-/* ========================================
-   ナンプレ盤
-======================================== */
-
-.sudoku {
-
-    width: 100%;
-
-    aspect-ratio: 1 / 1;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(9, 1fr);
-
-    background: var(--board);
-
-    border:
-        3px solid
-        var(--line);
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    box-shadow:
-        0 3px 9px
-        rgba(0,0,0,0.08);
-}
-
-
-/* ========================================
-   マス
-======================================== */
-
-.cell {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size:
-        clamp(
-            21px,
-            6vw,
-            33px
-        );
-
-    font-weight: 600;
-
-    border-right:
-        1px solid
-        #c7d5da;
-
-    border-bottom:
-        1px solid
-        #c7d5da;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    -webkit-tap-highlight-color:
-        transparent;
-}
-
-
-/* 3×3ブロック */
-
-.cell:nth-child(3n) {
-
-    border-right:
-        3px solid
-        var(--line);
-}
-
-
-.cell:nth-child(9n) {
-
-    border-right: none;
-}
-
-
-/* 横の太線 */
-
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-
-    border-bottom:
-        3px solid
-        var(--line);
-}
-
-
-/* ========================================
-   固定数字
-======================================== */
-
-.cell.fixed {
-
-    background: var(--board);
-
-    color: #40515a;
-
-    cursor: default;
-}
-
-
-/* ========================================
-   自分で入力
-======================================== */
-
-.cell.user {
-
-    background: var(--user);
-
-    color: #304b59;
-}
-
-
-/* ========================================
-   ヒント
-======================================== */
-
-.cell.hint {
-
-    background: var(--hint);
-
-    color: #7a3030;
-}
-
-
-/* ========================================
-   答え
-======================================== */
-
-.cell.answer {
-
-    background: var(--answer);
-
-    color: #665415;
-}
-
-
-/* ========================================
-   選択中
-======================================== */
-
-.cell.selected {
-
-    outline:
-        3px solid
-        var(--selected);
-
-    outline-offset: -3px;
-}
-
-
-/* ========================================
-   数字ボタン
-======================================== */
-
-.number-panel {
-
-    margin-top: 9px;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, 1fr);
-
-    gap: 6px;
-}
-
-
-button {
-
-    border: none;
-
-    border-radius: 9px;
-
-    min-height: 42px;
-
-    padding:
-        7px 4px;
-
-    font-size: 18px;
-
-    font-weight: 600;
-
-    color: var(--text);
-
-    background: var(--user);
-
-    box-shadow:
-        0 2px 4px
-        rgba(0,0,0,0.08);
-
-    cursor: pointer;
-
-    touch-action: manipulation;
-
-    -webkit-tap-highlight-color:
-        transparent;
-}
-
-
-button:active {
-
-    transform: scale(0.97);
-}
-
-
-/* 数字選択中 */
-
-button.number-selected {
-
-    background: var(--selected);
-
-    color: white;
-}
-
-
-/* 消す */
-
-#clearButton {
-
-    background: #9fc8dc;
-
-    color: white;
-}
-
-
-/* ========================================
-   操作ボタン
-======================================== */
-
-.control-buttons {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    gap: 6px;
-
-    margin-top: 7px;
-}
-
-
-#hintButton {
-
-    background: var(--hint);
-
-    font-size: 15px;
-}
-
-
-#clearAllButton {
-
-    background: var(--answer);
-
-    font-size: 15px;
-}
-
-
-#newGameButton {
-
-    background: #c9e1ea;
-
-    font-size: 15px;
-}
-
-
-/* ========================================
-   ヒント回数
-======================================== */
-
-.hint-count {
-
-    text-align: center;
-
-    margin-top: 6px;
-
-    font-size: 13px;
-
-    opacity: 0.75;
-}
-
-
-/* ========================================
-   答え合わせ
-======================================== */
-
-#answerButton {
-
-    width: 100%;
-
-    margin-top: 6px;
-
-    background: var(--answer);
-
-    font-size: 16px;
-}
-
-
-/* ========================================
-   メッセージ
-======================================== */
-
-.message {
-
-    min-height: 17px;
-
-    text-align: center;
-
-    margin-top: 4px;
-
-    font-size: 12px;
-
-    font-weight: 600;
-}
-
-
-/* ========================================
-   非表示
-======================================== */
-
-.hidden {
-
-    display: none !important;
-}
-
-
-/* ========================================
-   高さの小さいスマホ
-======================================== */
-
-@media (max-height: 760px) {
-
-    .app {
-
-        padding-top: 4px;
-
-        padding-bottom: 8px;
-    }
-
-
-    .title {
-
-        margin-bottom: 4px;
-    }
-
-
-    .title-main {
-
-        font-size: 23px;
-    }
-
-
-    .title-sub {
-
-        font-size: 12px;
-
-        margin-top: 3px;
-    }
-
-
-    .difficulty {
-
-        margin-bottom: 5px;
-    }
-
-
-    .difficulty button {
-
-        min-height: 31px;
-
-        font-size: 13px;
-    }
-
-
-    .number-panel {
-
-        margin-top: 6px;
-
-        gap: 5px;
-    }
-
-
-    button {
-
-        min-height: 38px;
-
-        padding: 6px 3px;
-
-        font-size: 17px;
-    }
-
-
-    .control-buttons {
-
-        margin-top: 5px;
-
-        gap: 5px;
-    }
-
-
-    #hintButton,
-    #clearAllButton,
-    #newGameButton {
-
-        font-size: 14px;
-    }
-
-
-    .hint-count {
-
-        margin-top: 4px;
-
-        font-size: 12px;
-    }
-
-
-    #answerButton {
-
-        margin-top: 4px;
-
-        min-height: 38px;
-    }
-
-}
-
 </style>
-
 </head>
-
-
 <body>
-
 <div class="app">
-
-
-    <!-- ==================================
-         タイトル
-    =================================== -->
-
-    <div class="title">
-
-        <div class="title-main">
-            🧩 ナンプレ
-        </div>
-
-        <div class="title-sub">
-            Sudoku
-        </div>
-
-    </div>
-
-
-    <!-- ==================================
-         難易度
-    =================================== -->
-
-    <div class="difficulty">
-
-        <button
-            id="easyButton"
-            onclick="setDifficulty('easy')">
-
-            初級
-
-        </button>
-
-
-        <button
-            id="normalButton"
-            onclick="setDifficulty('normal')">
-
-            中級
-
-        </button>
-
-
-        <button
-            id="hardButton"
-            onclick="setDifficulty('hard')">
-
-            上級
-
-        </button>
-
-    </div>
-
-
-    <!-- ==================================
-         ナンプレ盤
-    =================================== -->
-
-    <div
-        id="sudoku"
-        class="sudoku">
-    </div>
-
-
-    <!-- ==================================
-         数字
-    =================================== -->
-
-    <div class="number-panel">
-
-
-        <button
-            class="number-button"
-            data-number="1"
-            onclick="selectNumber(1)">
-            1
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="2"
-            onclick="selectNumber(2)">
-            2
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="3"
-            onclick="selectNumber(3)">
-            3
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="4"
-            onclick="selectNumber(4)">
-            4
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="5"
-            onclick="selectNumber(5)">
-            5
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="6"
-            onclick="selectNumber(6)">
-            6
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="7"
-            onclick="selectNumber(7)">
-            7
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="8"
-            onclick="selectNumber(8)">
-            8
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="9"
-            onclick="selectNumber(9)">
-            9
-        </button>
-
-
-        <button
-            id="clearButton"
-            onclick="selectClear()">
-
-            消す
-
-        </button>
-
-    </div>
-
-
-    <!-- ==================================
-         操作
-    =================================== -->
-
-    <div class="control-buttons">
-
-
-        <button
-            id="hintButton"
-            onclick="useHint()">
-
-            💡 ヒント
-
-        </button>
-
-
-        <button
-            id="clearAllButton"
-            onclick="clearAll()">
-
-            全消し
-
-        </button>
-
-
-        <button
-            id="newGameButton"
-            onclick="newGame()">
-
-            新しい問題
-
-        </button>
-
-    </div>
-
-
-    <!-- ==================================
-         ヒント回数
-    =================================== -->
-
-    <div class="hint-count">
-
-        ヒント使用回数：
-        <span id="hintCount">0</span> / 5
-
-    </div>
-
-
-    <!-- ==================================
-         答え合わせ
-    =================================== -->
-
-    <button
-        id="answerButton"
-        class="hidden"
-        onclick="checkAnswer()">
-
-        答え合わせ
-
-    </button>
-
-
-    <!-- ==================================
-         メッセージ
-    =================================== -->
-
-    <div
-        id="message"
-        class="message">
-    </div>
-
-
+  <div class="header">
+    <button class="top-btn" id="settingsOpen" aria-label="設定">⚙️</button>
+    <div class="title-main">🧩 ナンプレ</div>
+    <div class="title-sub">Sudoku</div>
+    <button class="top-btn" id="rulesOpen" aria-label="ルール">?</button>
+  </div>
+
+  <div class="difficulty">
+    <button data-level="easy">初級</button>
+    <button data-level="normal" class="active">中級</button>
+    <button data-level="hard">上級</button>
+  </div>
+
+  <div id="sudoku" class="sudoku"></div>
+
+  <div class="number-panel">
+    <button data-number="1">1</button><button data-number="2">2</button>
+    <button data-number="3">3</button><button data-number="4">4</button>
+    <button data-number="5">5</button><button data-number="6">6</button>
+    <button data-number="7">7</button><button data-number="8">8</button>
+    <button data-number="9">9</button><button id="clearButton">消す</button>
+  </div>
+
+  <div class="action-grid">
+    <button id="hintButton">💡 ヒント <span id="hintRemain">残り5回</span></button>
+    <button id="pencilButton">✏️ 仮置き OFF</button>
+    <button id="newGameButton">🔄 新しい問題</button>
+  </div>
+
+  <div class="status">
+    <span>⏱ 経過時間 <strong id="timer">00:00</strong></span>
+    <span>💡 ヒント <strong id="hintCount">0</strong>/5</span>
+  </div>
+
+  <button id="answerButton" class="hidden">答え合わせ</button>
+  <div id="message" class="message"></div>
+
+  <div class="legend">
+    <span><i class="dot user"></i>自分の入力</span>
+    <span><i class="dot pencil"></i>仮置き</span>
+    <span><i class="dot hint"></i>ヒント</span>
+    <span><i class="dot answer"></i>答え</span>
+  </div>
 </div>
 
+<div id="settingsModal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h2>⚙️ 設定</h2><button class="close" data-close="settingsModal">×</button></div>
+
+    <div class="setting-section">
+      <h3>🎮 ゲーム設定</h3>
+      <div class="setting-row"><span>ヒント回数</span><select id="hintSetting"><option value="5">5回</option></select></div>
+      <div class="setting-row"><span>起動時の難易度</span><select id="defaultDifficulty"><option value="easy">初級</option><option value="normal">中級</option><option value="hard">上級</option></select></div>
+    </div>
+
+    <div class="setting-section">
+      <h3>🎨 色のテーマ</h3>
+      <div class="theme-grid">
+        <button class="theme active" data-theme="blue"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9ddec"></i></div>ベージュ × ブルー</button>
+        <button class="theme" data-theme="green"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9dfc3"></i></div>ベージュ × グリーン</button>
+        <button class="theme" data-theme="purple"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#d9c4ef"></i></div>ベージュ × パープル</button>
+        <button class="theme" data-theme="mono"><div class="swatches"><i class="swatch" style="background:#eee"></i><i class="swatch" style="background:#c6d0d4"></i></div>モノトーン</button>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <h3>📖 ルール説明</h3>
+      <ol class="rule-list">
+        <li>1〜9の数字を使います。</li>
+        <li>縦の列に同じ数字を入れません。</li>
+        <li>横の行に同じ数字を入れません。</li>
+        <li>太線で囲まれた3×3ブロックにも同じ数字を入れません。</li>
+        <li>すべての空欄を正しく埋めたらクリアです。</li>
+      </ol>
+    </div>
+    <div class="modal-actions"><button data-close="settingsModal">閉じる</button></div>
+  </div>
+</div>
+
+<div id="rulesModal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h2>📖 ナンプレのルール</h2><button class="close" data-close="rulesModal">×</button></div>
+    <div class="setting-section">
+      <ol class="rule-list">
+        <li>空欄に1〜9の数字を入れます。</li>
+        <li>同じ横一列に同じ数字は入りません。</li>
+        <li>同じ縦一列に同じ数字は入りません。</li>
+        <li>3×3のブロックにも同じ数字は入りません。</li>
+        <li>すべて正しく埋めるとクリアです。</li>
+      </ol>
+    </div>
+    <div class="modal-actions"><button data-close="rulesModal">閉じる</button></div>
+  </div>
+</div>
+
+<div id="confirmModal" class="overlay hidden">
+  <div class="modal">
+    <div class="result-icon">🔄</div>
+    <div class="result-title">新しい問題</div>
+    <div class="result-text">現在の問題を終了して、<br>新しい問題に進みますか？</div>
+    <div class="confirm-buttons"><button id="confirmNo">いいえ</button><button id="confirmYes">はい</button></div>
+  </div>
+</div>
+
+<div id="resultModal" class="overlay hidden">
+  <div class="modal">
+    <div id="resultIcon" class="result-icon">🎉</div>
+    <div id="resultTitle" class="result-title">正解！</div>
+    <div id="resultText" class="result-text"></div>
+    <div class="modal-actions"><button id="resultOk" class="result-ok">OK</button></div>
+  </div>
+</div>
 
 <script>
-
-/* ========================================
-   難易度
-======================================== */
-
-let difficulty = "normal";
-
-
-/*
-   空欄の数
-
-   初級 ＝ 45個残す
-   中級 ＝ 36個残す
-   上級 ＝ 29個残す
-
-   ※空欄が多いほど難しくなる
-*/
-
-const difficultySettings = {
-
-    easy: {
-        remove: 36
-    },
-
-    normal: {
-        remove: 45
-    },
-
-    hard: {
-        remove: 52
-    }
-
+const THEMES={
+  blue:{bg:"#f5eedf",board:"#fffaf0",user:"#b9ddec",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#4e9bc1",line:"#88aaba",soft:"#d9eaf0",success:"#a9d9b9",danger:"#e9a2a2"},
+  green:{bg:"#f5eedf",board:"#fffaf0",user:"#b9dfc3",pencil:"#d8c8ed",hint:"#efb0b0",answer:"#f1db91",accent:"#5ea47a",line:"#8eaf9c",soft:"#dcecdf",success:"#a9d9b9",danger:"#e9a2a2"},
+  purple:{bg:"#f5eedf",board:"#fffaf0",user:"#c5dff0",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#8b71b2",line:"#9e91b5",soft:"#e6def0",success:"#b8d9c4",danger:"#e9a2a2"},
+  mono:{bg:"#eeeeeb",board:"#fafaf8",user:"#cbd5d9",pencil:"#d9d9d9",hint:"#d7b4b4",answer:"#e2d39a",accent:"#71828b",line:"#87969d",soft:"#e0e5e7",success:"#b8cbbd",danger:"#dfb1b1"}
 };
+let difficulty=localStorage.getItem("npDifficulty")||"normal";
+let themeName=localStorage.getItem("npTheme")||"blue";
+let solution=[], puzzle=[], board=[];
+let types=Array.from({length:9},()=>Array(9).fill(""));
+let selectedNumber=null, clearMode=false, pencilMode=false;
+let hintCount=0, answerMode=false, finished=false;
+let seconds=0, timerId=null;
 
+const sudoku=document.getElementById("sudoku");
+const msg=document.getElementById("message");
 
-/* ========================================
-   現在の問題
-======================================== */
-
-let originalPuzzle = [];
-
-let solution = [];
-
-let board = [];
-
-
-/* ========================================
-   マスの種類
-
-   ""       空
-   user     自分で入力
-   hint     ヒント
-   answer   答え合わせ
-======================================== */
-
-let cellType =
-    Array.from(
-        { length: 9 },
-        () => Array(9).fill("")
-    );
-
-
-/* ========================================
-   操作状態
-======================================== */
-
-let selectedNumber = null;
-
-let clearMode = false;
-
-let hintCount = 0;
-
-let answerMode = false;
-
-
-/* ========================================
-   配列コピー
-======================================== */
-
-function copyBoard(source) {
-
-    return source.map(
-        row => [...row]
-    );
-
+function applyTheme(name){
+  themeName=name; localStorage.setItem("npTheme",name);
+  const t=THEMES[name];
+  for(const [k,v] of Object.entries(t)) document.documentElement.style.setProperty("--"+k,v);
+  document.querySelectorAll(".theme").forEach(b=>b.classList.toggle("active",b.dataset.theme===name));
 }
-
-
-/* ========================================
-   シャッフル
-======================================== */
-
-function shuffle(array) {
-
-    const result = [...array];
-
-
-    for (
-        let i = result.length - 1;
-        i > 0;
-        i--
-    ) {
-
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-
-        [
-            result[i],
-            result[j]
-        ] =
-        [
-            result[j],
-            result[i]
-        ];
-
-    }
-
-
-    return result;
-
+function shuffle(a){
+  a=[...a];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
 }
-
-
-/* ========================================
-   完成した数独を作る
-======================================== */
-
-function generateSolution() {
-
-    const grid =
-        Array.from(
-            { length: 9 },
-            () => Array(9).fill(0)
-        );
-
-
-    function solve() {
-
-        let bestRow = -1;
-
-        let bestCol = -1;
-
-        let bestCandidates = null;
-
-
-        /* 候補が一番少ないマスを探す */
-
-        for (
-            let row = 0;
-            row < 9;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < 9;
-                col++
-            ) {
-
-                if (
-                    grid[row][col] !== 0
-                ) {
-
-                    continue;
-
-                }
-
-
-                const candidates =
-                    getCandidates(
-                        grid,
-                        row,
-                        col
-                    );
-
-
-                if (
-                    candidates.length === 0
-                ) {
-
-                    return false;
-
-                }
-
-
-                if (
-                    bestCandidates === null ||
-                    candidates.length <
-                    bestCandidates.length
-                ) {
-
-                    bestRow = row;
-
-                    bestCol = col;
-
-                    bestCandidates =
-                        candidates;
-
-                }
-
-            }
-
-        }
-
-
-        /* 全部埋まった */
-
-        if (
-            bestCandidates === null
-        ) {
-
-            return true;
-
-        }
-
-
-        /* 候補をランダム順 */
-
-        const numbers =
-            shuffle(
-                bestCandidates
-            );
-
-
-        for (
-            const number of numbers
-        ) {
-
-            grid[bestRow][bestCol] =
-                number;
-
-
-            if (solve()) {
-
-                return true;
-
-            }
-
-
-            grid[bestRow][bestCol] = 0;
-
-        }
-
-
-        return false;
-
-    }
-
-
-    solve();
-
-
-    return grid;
-
+function candidates(g,r,c){
+  const used=new Set();
+  for(let i=0;i<9;i++){if(g[r][i])used.add(g[r][i]);if(g[i][c])used.add(g[i][c])}
+  const sr=Math.floor(r/3)*3, sc=Math.floor(c/3)*3;
+  for(let rr=sr;rr<sr+3;rr++)for(let cc=sc;cc<sc+3;cc++)if(g[rr][cc])used.add(g[rr][cc]);
+  return [1,2,3,4,5,6,7,8,9].filter(n=>!used.has(n));
 }
-
-
-/* ========================================
-   候補数字
-======================================== */
-
-function getCandidates(
-    grid,
-    row,
-    col
-) {
-
-    const used =
-        new Set();
-
-
-    /* 横 */
-
-    for (let c = 0; c < 9; c++) {
-
-        if (
-            grid[row][c] !== 0
-        ) {
-
-            used.add(
-                grid[row][c]
-            );
-
-        }
-
+function makeSolution(){
+  const g=Array.from({length:9},()=>Array(9).fill(0));
+  function solve(){
+    let br=-1,bc=-1,best=null;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+      if(g[r][c])continue;
+      const cs=candidates(g,r,c);
+      if(!cs.length)return false;
+      if(!best||cs.length<best.length){br=r;bc=c;best=cs}
     }
-
-
-    /* 縦 */
-
-    for (let r = 0; r < 9; r++) {
-
-        if (
-            grid[r][col] !== 0
-        ) {
-
-            used.add(
-                grid[r][col]
-            );
-
-        }
-
-    }
-
-
-    /* 3×3 */
-
-    const startRow =
-        Math.floor(row / 3) * 3;
-
-    const startCol =
-        Math.floor(col / 3) * 3;
-
-
-    for (
-        let r = startRow;
-        r < startRow + 3;
-        r++
-    ) {
-
-        for (
-            let c = startCol;
-            c < startCol + 3;
-            c++
-        ) {
-
-            if (
-                grid[r][c] !== 0
-            ) {
-
-                used.add(
-                    grid[r][c]
-                );
-
-            }
-
-        }
-
-    }
-
-
-    const result = [];
-
-
-    for (
-        let number = 1;
-        number <= 9;
-        number++
-    ) {
-
-        if (
-            !used.has(number)
-        ) {
-
-            result.push(number);
-
-        }
-
-    }
-
-
-    return result;
-
+    if(!best)return true;
+    for(const n of shuffle(best)){g[br][bc]=n;if(solve())return true;g[br][bc]=0}
+    return false;
+  }
+  solve(); return g;
 }
-
-
-/* ========================================
-   解が何個あるか調べる
-
-   2個見つかった時点で終了
-======================================== */
-
-function countSolutions(grid) {
-
-    let count = 0;
-
-
-    function solve() {
-
-        if (count >= 2) {
-
-            return;
-
-        }
-
-
-        let bestRow = -1;
-
-        let bestCol = -1;
-
-        let bestCandidates = null;
-
-
-        for (
-            let row = 0;
-            row < 9;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < 9;
-                col++
-            ) {
-
-                if (
-                    grid[row][col] !== 0
-                ) {
-
-                    continue;
-
-                }
-
-
-                const candidates =
-                    getCandidates(
-                        grid,
-                        row,
-                        col
-                    );
-
-
-                if (
-                    candidates.length === 0
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    bestCandidates === null ||
-                    candidates.length <
-                    bestCandidates.length
-                ) {
-
-                    bestRow = row;
-
-                    bestCol = col;
-
-                    bestCandidates =
-                        candidates;
-
-                }
-
-            }
-
-        }
-
-
-        /* 解が完成 */
-
-        if (
-            bestCandidates === null
-        ) {
-
-            count++;
-
-            return;
-
-        }
-
-
-        for (
-            const number of bestCandidates
-        ) {
-
-            grid[bestRow][bestCol] =
-                number;
-
-
-            solve();
-
-
-            grid[bestRow][bestCol] = 0;
-
-
-            if (count >= 2) {
-
-                return;
-
-            }
-
-        }
-
+function countSolutions(g,limit=2){
+  let count=0;
+  function solve(){
+    if(count>=limit)return;
+    let br=-1,bc=-1,best=null;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+      if(g[r][c])continue;
+      const cs=candidates(g,r,c);
+      if(!cs.length)return;
+      if(!best||cs.length<best.length){br=r;bc=c;best=cs}
     }
-
-
-    solve();
-
-
-    return count;
-
+    if(!best){count++;return}
+    for(const n of best){g[br][bc]=n;solve();g[br][bc]=0;if(count>=limit)return}
+  }
+  solve(); return count;
 }
-
-
-/* ========================================
-   問題生成
-======================================== */
-
-function generatePuzzle() {
-
-
-    /*
-       最大8回まで作り直す。
-
-       これにより、難しい問題でも
-       「解が1つだけ」の問題を探す。
-    */
-
-    for (
-        let attempt = 0;
-        attempt < 8;
-        attempt++
-    ) {
-
-
-        /* 完成形 */
-
-        const solved =
-            generateSolution();
-
-
-        const puzzle =
-            copyBoard(solved);
-
-
-        /* 消す場所 */
-
-        const positions = [];
-
-
-        for (
-            let row = 0;
-            row < 9;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < 9;
-                col++
-            ) {
-
-                positions.push({
-                    row,
-                    col
-                });
-
-            }
-
-        }
-
-
-        const shuffled =
-            shuffle(positions);
-
-
-        const removeCount =
-            difficultySettings[
-                difficulty
-            ].remove;
-
-
-        let removed = 0;
-
-
-        /*
-           一つずつ消して、
-           解が1つなら採用。
-        */
-
-        for (
-            const position of shuffled
-        ) {
-
-
-            if (
-                removed >= removeCount
-            ) {
-
-                break;
-
-            }
-
-
-            const row =
-                position.row;
-
-            const col =
-                position.col;
-
-
-            const backup =
-                puzzle[row][col];
-
-
-            puzzle[row][col] = 0;
-
-
-            const test =
-                copyBoard(puzzle);
-
-
-            const solutions =
-                countSolutions(test);
-
-
-            if (
-                solutions === 1
-            ) {
-
-                removed++;
-
-            }
-            else {
-
-                puzzle[row][col] =
-                    backup;
-
-            }
-
-        }
-
-
-        /*
-           目標数まで消せたら完成
-        */
-
-        if (
-            removed >= removeCount
-        ) {
-
-            solution = solved;
-
-            originalPuzzle = puzzle;
-
-            return true;
-
-        }
-
+function generatePuzzle(){
+  const remove={easy:34,normal:44,hard:50}[difficulty];
+  for(let attempt=0;attempt<10;attempt++){
+    const solved=makeSolution(), p=solved.map(r=>[...r]);
+    let removed=0;
+    for(const pos of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){
+      if(removed>=remove)break;
+      const [r,c]=pos, old=p[r][c]; p[r][c]=0;
+      if(countSolutions(p.map(r=>[...r]))===1)removed++; else p[r][c]=old;
     }
-
-
-    /*
-       8回で完成しなかった場合は、
-       とりあえずもう一度生成する。
-    */
-
-    return generatePuzzle();
-
+    if(removed>=remove){solution=solved;puzzle=p;return}
+  }
+  solution=makeSolution();
+  puzzle=solution.map(r=>[...r]);
+  const remove={easy:34,normal:44,hard:50}[difficulty];
+  for(const [r,c] of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9])))puzzle[r][c]=0;
 }
-
-
-/* ========================================
-   新しい問題を開始
-======================================== */
-
-function startNewPuzzle() {
-
-
-    generatePuzzle();
-
-
-    board =
-        copyBoard(
-            originalPuzzle
-        );
-
-
-    cellType =
-        Array.from(
-            { length: 9 },
-            () => Array(9).fill("")
-        );
-
-
-    selectedNumber = null;
-
-    clearMode = false;
-
-    hintCount = 0;
-
-    answerMode = false;
-
-
-    document
-        .getElementById("hintCount")
-        .textContent = "0";
-
-
-    document
-        .getElementById("answerButton")
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .querySelectorAll(
-            ".number-button"
-        )
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById(
-            "clearButton"
-        )
-        .classList.remove(
-            "number-selected"
-        );
-
-
-    showMessage("");
-
-
-    createBoard();
-
+function resetSelection(){
+  selectedNumber=null; clearMode=false;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("clearButton").classList.remove("selected");
 }
-
-
-/* ========================================
-   難易度変更
-======================================== */
-
-function setDifficulty(level) {
-
-
-    difficulty = level;
-
-
-    document
-        .querySelectorAll(
-            ".difficulty button"
-        )
-        .forEach(button => {
-
-            button.classList.remove(
-                "active"
-            );
-
-        });
-
-
-    if (
-        level === "easy"
-    ) {
-
-        document
-            .getElementById(
-                "easyButton"
-            )
-            .classList.add(
-                "active"
-            );
-
+function render(){
+  sudoku.innerHTML="";
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+    const cell=document.createElement("div");
+    cell.className="cell";
+    if(c===2||c===5)cell.classList.add("br");
+    if(r===2||r===5)cell.classList.add("bb");
+    if(puzzle[r][c]){
+      cell.textContent=puzzle[r][c];cell.classList.add("fixed");
+    }else if(board[r][c]){
+      cell.textContent=board[r][c];
+      if(types[r][c])cell.classList.add(types[r][c]);
     }
-
-
-    if (
-        level === "normal"
-    ) {
-
-        document
-            .getElementById(
-                "normalButton"
-            )
-            .classList.add(
-                "active"
-            );
-
-    }
-
-
-    if (
-        level === "hard"
-    ) {
-
-        document
-            .getElementById(
-                "hardButton"
-            )
-            .classList.add(
-                "active"
-            );
-
-    }
-
-
-    startNewPuzzle();
-
+    cell.addEventListener("click",()=>tapCell(r,c,cell));
+    sudoku.appendChild(cell);
+  }
 }
-
-
-/* ========================================
-   盤面作成
-======================================== */
-
-function createBoard() {
-
-
-    const sudoku =
-        document.getElementById(
-            "sudoku"
-        );
-
-
-    sudoku.innerHTML = "";
-
-
-    for (
-        let row = 0;
-        row < 9;
-        row++
-    ) {
-
-
-        for (
-            let col = 0;
-            col < 9;
-            col++
-        ) {
-
-
-            const cell =
-                document.createElement(
-                    "div"
-                );
-
-
-            cell.className = "cell";
-
-
-            /* 固定数字 */
-
-            if (
-                originalPuzzle[row][col] !== 0
-            ) {
-
-                cell.textContent =
-                    originalPuzzle[row][col];
-
-                cell.classList.add(
-                    "fixed"
-                );
-
-            }
-
-
-            /* 入力済み */
-
-            else if (
-                board[row][col] !== 0
-            ) {
-
-                cell.textContent =
-                    board[row][col];
-
-
-                if (
-                    cellType[row][col] ===
-                    "user"
-                ) {
-
-                    cell.classList.add(
-                        "user"
-                    );
-
-                }
-
-
-                if (
-                    cellType[row][col] ===
-                    "hint"
-                ) {
-
-                    cell.classList.add(
-                        "hint"
-                    );
-
-                }
-
-
-                if (
-                    cellType[row][col] ===
-                    "answer"
-                ) {
-
-                    cell.classList.add(
-                        "answer"
-                    );
-
-                }
-
-            }
-
-
-            /* マスをタップ */
-
-            cell.addEventListener(
-                "click",
-                function() {
-
-
-                    /* 固定数字 */
-
-                    if (
-                        originalPuzzle[row][col] !== 0
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    /* 答え表示中 */
-
-                    if (
-                        answerMode
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    /* 数字入力 */
-
-                    if (
-                        selectedNumber !== null
-                    ) {
-
-
-                        board[row][col] =
-                            selectedNumber;
-
-
-                        cellType[row][col] =
-                            "user";
-
-
-                        cell.textContent =
-                            selectedNumber;
-
-
-                        cell.classList.remove(
-                            "hint",
-                            "answer"
-                        );
-
-
-                        cell.classList.add(
-                            "user"
-                        );
-
-
-                        highlightCell(
-                            cell
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    /* 消す */
-
-                    if (
-                        clearMode
-                    ) {
-
-
-                        board[row][col] = 0;
-
-                        cellType[row][col] = "";
-
-                        cell.textContent = "";
-
-
-                        cell.classList.remove(
-                            "user",
-                            "hint",
-                            "answer"
-                        );
-
-
-                        highlightCell(
-                            cell
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    highlightCell(
-                        cell
-                    );
-
-                }
-            );
-
-
-            sudoku.appendChild(
-                cell
-            );
-
-        }
-
+function tapCell(r,c,cell){
+  if(puzzle[r][c]||finished||answerMode)return;
+  document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));
+  cell.classList.add("selected");
+  if(clearMode){board[r][c]=0;types[r][c]="";render();return}
+  if(selectedNumber!==null){
+    if(board[r][c]===selectedNumber && types[r][c]===(pencilMode?"pencil":"user")){
+      board[r][c]=0;types[r][c]="";
+    }else{
+      board[r][c]=selectedNumber;types[r][c]=pencilMode?"pencil":"user";
     }
-
+    render();
+    checkComplete();
+  }
 }
-
-
-/* ========================================
-   数字選択
-======================================== */
-
-function selectNumber(number) {
-
-
-    selectedNumber =
-        number;
-
-
-    clearMode = false;
-
-
-    document
-        .querySelectorAll(
-            ".number-button"
-        )
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    const button =
-        document.querySelector(
-            `.number-button[data-number="${number}"]`
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "number-selected"
-        );
-
-    }
-
-
-    document
-        .getElementById(
-            "clearButton"
-        )
-        .classList.remove(
-            "number-selected"
-        );
-
+function selectNumber(n){
+  selectedNumber=n;clearMode=false;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.toggle("selected",+b.dataset.number===n));
+  document.getElementById("clearButton").classList.remove("selected");
 }
-
-
-/* ========================================
-   消す
-======================================== */
-
-function selectClear() {
-
-
-    selectedNumber = null;
-
-    clearMode = true;
-
-
-    document
-        .querySelectorAll(
-            ".number-button"
-        )
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById(
-            "clearButton"
-        )
-        .classList.add(
-            "number-selected"
-        );
-
+function selectClear(){
+  selectedNumber=null;clearMode=true;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("clearButton").classList.add("selected");
 }
-
-
-/* ========================================
-   ヒント
-======================================== */
-
-function useHint() {
-
-
-    if (
-        answerMode
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        hintCount >= 5
-    ) {
-
-        return;
-
-    }
-
-
-    const emptyCells = [];
-
-
-    for (
-        let row = 0;
-        row < 9;
-        row++
-    ) {
-
-        for (
-            let col = 0;
-            col < 9;
-            col++
-        ) {
-
-
-            if (
-
-                originalPuzzle[row][col] === 0 &&
-
-                board[row][col] === 0
-
-            ) {
-
-                emptyCells.push({
-                    row,
-                    col
-                });
-
-            }
-
-        }
-
-    }
-
-
-    if (
-        emptyCells.length === 0
-    ) {
-
-        return;
-
-    }
-
-
-    /* ランダムに1マス */
-
-    const target =
-        emptyCells[
-            Math.floor(
-                Math.random() *
-                emptyCells.length
-            )
-        ];
-
-
-    const row =
-        target.row;
-
-    const col =
-        target.col;
-
-
-    board[row][col] =
-        solution[row][col];
-
-
-    cellType[row][col] =
-        "hint";
-
-
-    hintCount++;
-
-
-    document
-        .getElementById(
-            "hintCount"
-        )
-        .textContent =
-            hintCount;
-
-
-    /* 5回で答え合わせ表示 */
-
-    if (
-        hintCount >= 5
-    ) {
-
-        document
-            .getElementById(
-                "answerButton"
-            )
-            .classList.remove(
-                "hidden"
-            );
-
-    }
-
-
-    createBoard();
-
+function togglePencil(){
+  pencilMode=!pencilMode;
+  const b=document.getElementById("pencilButton");
+  b.classList.toggle("on",pencilMode);
+  b.textContent=pencilMode?"✏️ 仮置き ON":"✏️ 仮置き OFF";
 }
-
-
-/* ========================================
-   全消し
-======================================== */
-
-function clearAll() {
-
-
-    /*
-       固定数字以外を全部消す
-    */
-
-    for (
-        let row = 0;
-        row < 9;
-        row++
-    ) {
-
-        for (
-            let col = 0;
-            col < 9;
-            col++
-        ) {
-
-
-            if (
-                originalPuzzle[row][col] === 0
-            ) {
-
-                board[row][col] = 0;
-
-                cellType[row][col] = "";
-
-            }
-
-        }
-
-    }
-
-
-    /* 状態を完全にリセット */
-
-    selectedNumber = null;
-
-    clearMode = false;
-
-    hintCount = 0;
-
-    answerMode = false;
-
-
-    document
-        .getElementById(
-            "hintCount"
-        )
-        .textContent = "0";
-
-
-    document
-        .getElementById(
-            "answerButton"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .querySelectorAll(
-            ".number-button"
-        )
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById(
-            "clearButton"
-        )
-        .classList.remove(
-            "number-selected"
-        );
-
-
-    createBoard();
-
+function useHint(){
+  if(finished||answerMode||hintCount>=5)return;
+  const empty=[];
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])empty.push([r,c]);
+  if(!empty.length){checkComplete();return}
+  const [r,c]=empty[Math.floor(Math.random()*empty.length)];
+  board[r][c]=solution[r][c];types[r][c]="hint";hintCount++;
+  updateStatus();render();
+  if(hintCount>=5)document.getElementById("answerButton").classList.remove("hidden");
 }
-
-
-/* ========================================
-   答え合わせ
-======================================== */
-
-function checkAnswer() {
-
-
-    /* --------------------------------
-       答えを表示中
-    -------------------------------- */
-
-    if (
-        answerMode
-    ) {
-
-
-        for (
-            let row = 0;
-            row < 9;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < 9;
-                col++
-            ) {
-
-
-                if (
-                    cellType[row][col] ===
-                    "answer"
-                ) {
-
-                    board[row][col] = 0;
-
-                    cellType[row][col] = "";
-
-                }
-
-            }
-
-        }
-
-
-        answerMode = false;
-
-
-        createBoard();
-
-
-        return;
-
-    }
-
-
-    /* --------------------------------
-       残りを全部正解で埋める
-    -------------------------------- */
-
-    for (
-        let row = 0;
-        row < 9;
-        row++
-    ) {
-
-        for (
-            let col = 0;
-            col < 9;
-            col++
-        ) {
-
-
-            if (
-
-                originalPuzzle[row][col] === 0 &&
-
-                board[row][col] === 0
-
-            ) {
-
-                board[row][col] =
-                    solution[row][col];
-
-
-                cellType[row][col] =
-                    "answer";
-
-            }
-
-        }
-
-    }
-
-
-    answerMode = true;
-
-
-    createBoard();
-
+function updateStatus(){
+  document.getElementById("hintCount").textContent=hintCount;
+  document.getElementById("hintRemain").textContent="残り"+(5-hintCount)+"回";
 }
-
-
-/* ========================================
-   マス選択
-======================================== */
-
-function highlightCell(cell) {
-
-
-    document
-        .querySelectorAll(
-            ".cell"
-        )
-        .forEach(c => {
-
-            c.classList.remove(
-                "selected"
-            );
-
-        });
-
-
-    cell.classList.add(
-        "selected"
-    );
-
+function checkComplete(){
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])return;
+  let wrong=0;
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(board[r][c]!==solution[r][c])wrong++;
+  if(wrong===0)finish(true);
+  else showResult(false,wrong);
 }
-
-
-/* ========================================
-   新しい問題
-======================================== */
-
-function newGame() {
-
-    startNewPuzzle();
-
+function finish(correct){
+  finished=true;stopTimer();
+  showResult(true,0);
 }
-
-
-/* ========================================
-   メッセージ
-======================================== */
-
-function showMessage(text) {
-
-    document
-        .getElementById(
-            "message"
-        )
-        .textContent = text;
-
+function showResult(correct,wrong){
+  const icon=document.getElementById("resultIcon"),title=document.getElementById("resultTitle"),text=document.getElementById("resultText"),ok=document.getElementById("resultOk");
+  if(correct){
+    icon.textContent="🎉";title.textContent="正解！";text.innerHTML=`すべてのマスが正しく埋まりました！<br><strong>クリアタイム　${formatTime(seconds)}</strong><br>ヒント使用回数　${hintCount} / 5`;
+    ok.className="result-ok";
+  }else{
+    icon.textContent="❌";title.textContent=`あと ${wrong} 個違います`;text.innerHTML="間違っているマスを確認して、もう一度挑戦してみましょう。";ok.className="result-ng";
+    document.querySelectorAll(".cell").forEach((cell,i)=>{const r=Math.floor(i/9),c=i%9;if(!puzzle[r][c]&&board[r][c]&&board[r][c]!==solution[r][c])cell.classList.add("wrong")});
+  }
+  document.getElementById("resultModal").classList.remove("hidden");
 }
+function openAnswer(){
+  if(!answerMode){
+    answerMode=true;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]){board[r][c]=solution[r][c];types[r][c]="answer"}
+    render();
+  }else{
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(types[r][c]==="answer"){board[r][c]=0;types[r][c]=""}
+    answerMode=false;render();
+  }
+}
+function startTimer(){
+  stopTimer();timerId=setInterval(()=>{if(!finished&&!answerMode){seconds++;document.getElementById("timer").textContent=formatTime(seconds)}},1000);
+}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function newGame(){
+  document.getElementById("confirmModal").classList.remove("hidden");
+}
+function actuallyNewGame(){
+  document.getElementById("confirmModal").classList.add("hidden");
+  finished=false;answerMode=false;hintCount=0;seconds=0;resetSelection();
+  types=Array.from({length:9},()=>Array(9).fill(""));
+  board=[];generatePuzzle();board=puzzle.map(r=>[...r]);
+  document.getElementById("answerButton").classList.add("hidden");
+  document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer();
+}
+function setDifficulty(level){
+  difficulty=level;localStorage.setItem("npDifficulty",level);
+  document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===level));
+  actuallyNewGame();
+}
+function openModal(id){document.getElementById(id).classList.remove("hidden")}
+function closeModal(id){document.getElementById(id).classList.add("hidden")}
 
-
-/* ========================================
-   起動
-======================================== */
-
-setDifficulty("normal");
-
+document.querySelectorAll("[data-number]").forEach(b=>b.addEventListener("click",()=>selectNumber(+b.dataset.number)));
+document.getElementById("clearButton").addEventListener("click",selectClear);
+document.getElementById("hintButton").addEventListener("click",useHint);
+document.getElementById("pencilButton").addEventListener("click",togglePencil);
+document.getElementById("newGameButton").addEventListener("click",newGame);
+document.getElementById("answerButton").addEventListener("click",openAnswer);
+document.getElementById("settingsOpen").addEventListener("click",()=>openModal("settingsModal"));
+document.getElementById("rulesOpen").addEventListener("click",()=>openModal("rulesModal"));
+document.getElementById("confirmNo").addEventListener("click",()=>closeModal("confirmModal"));
+document.getElementById("confirmYes").addEventListener("click",actuallyNewGame);
+document.getElementById("resultOk").addEventListener("click",()=>{closeModal("resultModal");document.querySelectorAll(".wrong").forEach(x=>x.classList.remove("wrong"))});
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+document.querySelectorAll(".difficulty button").forEach(b=>b.addEventListener("click",()=>setDifficulty(b.dataset.level)));
+document.querySelectorAll(".theme").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.theme)));
+document.getElementById("defaultDifficulty").value=difficulty;
+document.getElementById("defaultDifficulty").addEventListener("change",e=>{difficulty=e.target.value;localStorage.setItem("npDifficulty",difficulty)});
+applyTheme(themeName);
+document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));
+actuallyNewGame();
 </script>
-
 </body>
-
 </html>
