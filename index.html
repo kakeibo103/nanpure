@@ -127,6 +127,89 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
 }
 .candidate-grid span.empty{visibility:hidden}
 
+
+/* ===== 第5.2号：バッジシステム ===== */
+.badge-open{
+  width:100%;
+  margin-top:5px;
+  min-height:34px;
+  border:0;
+  border-radius:10px;
+  background:#e8dfc9;
+  color:#4d5b50;
+  font-weight:700;
+  cursor:pointer;
+}
+.badge-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:16px;
+}
+.badge-modal.hidden{display:none}
+.badge-panel{
+  width:min(430px,94vw);
+  max-height:82vh;
+  overflow:auto;
+  background:#fffdf8;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 10px 40px rgba(0,0,0,.2);
+}
+.badge-panel h2{margin:0 0 12px;text-align:center}
+.badge-list{display:grid;gap:8px}
+.badge-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px;
+  border-radius:12px;
+  background:#f3efe4;
+}
+.badge-icon{
+  width:48px;height:48px;flex:0 0 48px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  font-size:25px;
+  background:#d9d4c6;
+}
+.badge-item.earned .badge-icon{
+  background:#f1d37a;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.badge-name{font-weight:800}
+.badge-condition{font-size:12px;margin-top:2px;color:#68746b}
+.badge-close{
+  width:100%;margin-top:12px;min-height:38px;
+  border:0;border-radius:10px;background:#dfe9dc;
+  font-weight:700;
+}
+.badge-toast{
+  position:fixed;
+  left:50%;
+  top:16%;
+  transform:translateX(-50%);
+  z-index:1100;
+  width:min(340px,88vw);
+  padding:16px;
+  border-radius:16px;
+  background:#fff7d6;
+  text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,.22);
+  font-weight:800;
+}
+.badge-toast.hidden{display:none}
+@media(max-width:430px){
+  .badge-open{min-height:32px;font-size:13px}
+  .badge-panel{padding:14px}
+  .badge-item{padding:8px}
+  .badge-icon{width:42px;height:42px;flex-basis:42px;font-size:22px}
+}
+
 </style>
 </head>
 <body>
@@ -166,6 +249,8 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
     <button id="pencilButton">✏️ 仮置き OFF</button>
     <button id="newGameButton">🔄 新しい問題</button>
   </div>
+
+  <button id="badgeOpen" class="badge-open">🏆 バッジコレクション</button>
 
   <button id="answerButton" class="hidden">答え合わせ</button>
   <div id="message" class="message"></div>
@@ -259,6 +344,7 @@ let solution=[], puzzle=[], board=[];
 let types=Array.from({length:9},()=>Array(9).fill(""));
 let pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
 let selectedNumber=null, clearMode=false, pencilMode=false;
+let mistakeCount=0;
 let hintCount=0, answerMode=false, finished=false;
 let seconds=0, timerId=null;
 
@@ -522,6 +608,118 @@ document.getElementById("defaultDifficulty").addEventListener("change",e=>{diffi
 applyTheme(themeName);
 document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));
 actuallyNewGame();
+
+/* ===== 第5.2号：バッジ ===== */
+const BADGES = [
+  {id:"easy10", icon:"🥉", name:"初級ブロンズ", condition:"初級を10分以内でクリア"},
+  {id:"easy7",  icon:"🥈", name:"初級シルバー", condition:"初級を7分以内でクリア"},
+  {id:"easy5",  icon:"🥇", name:"初級ゴールド", condition:"初級を5分以内でクリア"},
+  {id:"easy3",  icon:"💎", name:"初級プラチナ", condition:"初級を3分以内でクリア"},
+  {id:"normal15",icon:"🥉",name:"中級ブロンズ",condition:"中級を15分以内でクリア"},
+  {id:"normal10",icon:"🥈",name:"中級シルバー",condition:"中級を10分以内でクリア"},
+  {id:"normal7", icon:"🥇",name:"中級ゴールド", condition:"中級を7分以内でクリア"},
+  {id:"normal5", icon:"💎",name:"中級プラチナ",condition:"中級を5分以内でクリア"},
+  {id:"hard25", icon:"🥉",name:"上級ブロンズ",condition:"上級を25分以内でクリア"},
+  {id:"hard18", icon:"🥈",name:"上級シルバー",condition:"上級を18分以内でクリア"},
+  {id:"hard12", icon:"🥇",name:"上級ゴールド",condition:"上級を12分以内でクリア"},
+  {id:"hard8",  icon:"💎",name:"上級プラチナ",condition:"上級を8分以内でクリア"},
+  {id:"perfect",icon:"🎯",name:"パーフェクト",condition:"ミス0回・ヒント0回でクリア"},
+  {id:"speed",  icon:"⚡",name:"スピードスター",condition:"5分以内にクリア"},
+  {id:"streak3",icon:"🔥",name:"3連勝",condition:"3問連続でクリア"}
+];
+
+function getBadges(){
+  try{return JSON.parse(localStorage.getItem("sudokuBadges")||"[]")}catch(e){return []}
+}
+function saveBadges(a){localStorage.setItem("sudokuBadges",JSON.stringify(a))}
+function getWinStreak(){return Number(localStorage.getItem("sudokuWinStreak")||0)}
+function setWinStreak(n){localStorage.setItem("sudokuWinStreak",String(n))}
+
+function renderBadges(){
+  const earned=getBadges();
+  document.getElementById("badgeList").innerHTML=BADGES.map(b=>{
+    const ok=earned.includes(b.id);
+    return `<div class="badge-item ${ok?"earned":""}">
+      <div class="badge-icon">${ok?b.icon:"🔒"}</div>
+      <div><div class="badge-name">${ok?b.name:"？？？"}</div>
+      <div class="badge-condition">${b.condition}</div></div>
+    </div>`;
+  }).join("");
+}
+function showBadgeToast(newBadges){
+  if(!newBadges.length)return;
+  const names=newBadges.map(id=>{
+    const b=BADGES.find(x=>x.id===id); return b ? `${b.icon} ${b.name}` : "";
+  }).filter(Boolean);
+  const toast=document.getElementById("badgeToast");
+  toast.innerHTML=`🎉 新しいバッジを獲得！<br>${names.join("<br>")}`;
+  toast.classList.remove("hidden");
+  setTimeout(()=>toast.classList.add("hidden"),3000);
+}
+function evaluateBadges(){
+  const mins=seconds/60;
+  const earned=getBadges();
+  const newly=[];
+  const add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};
+
+  if(difficulty==="easy"){
+    if(mins<=10)add("easy10");
+    if(mins<=7)add("easy7");
+    if(mins<=5)add("easy5");
+    if(mins<=3)add("easy3");
+  }
+  if(difficulty==="normal"){
+    if(mins<=15)add("normal15");
+    if(mins<=10)add("normal10");
+    if(mins<=7)add("normal7");
+    if(mins<=5)add("normal5");
+  }
+  if(difficulty==="hard"){
+    if(mins<=25)add("hard25");
+    if(mins<=18)add("hard18");
+    if(mins<=12)add("hard12");
+    if(mins<=8)add("hard8");
+  }
+  if(hintCount===0 && mistakeCount===0)add("perfect");
+  if(mins<=5)add("speed");
+
+  const streak=getWinStreak()+1;
+  setWinStreak(streak);
+  if(streak>=3)add("streak3");
+
+  saveBadges(earned);
+  renderBadges();
+  showBadgeToast(newly);
+}
+
+/* 既存のfinish()をバッジ対応に置き換え */
+const _originalFinish = finish;
+finish = function(correct){
+  _originalFinish(correct);
+  if(correct) evaluateBadges();
+};
+
+document.getElementById("badgeOpen").addEventListener("click",()=>{
+  renderBadges();
+  document.getElementById("badgeModal").classList.remove("hidden");
+});
+document.getElementById("badgeClose").addEventListener("click",()=>{
+  document.getElementById("badgeModal").classList.add("hidden");
+});
+document.getElementById("badgeModal").addEventListener("click",e=>{
+  if(e.target.id==="badgeModal")e.target.classList.add("hidden");
+});
+
 </script>
+
+<div id="badgeModal" class="badge-modal hidden">
+  <div class="badge-panel">
+    <h2>🏆 バッジコレクション</h2>
+    <div id="badgeList" class="badge-list"></div>
+    <button id="badgeClose" class="badge-close">閉じる</button>
+  </div>
+</div>
+<div id="badgeToast" class="badge-toast hidden"></div>
+
 </body>
 </html>
