@@ -714,10 +714,7 @@ button.number-selected {
         <button id="newGameButton" onclick="newGame()">新しい問題</button>
 
     </div>
-
-    <div class="game-status">
-        <div>⏱ 経過時間：<span id="timer">00:00</span></div>
-        <div>💡 ヒント：<span id="hintCount">0</span> / 5</div>
+<div>💡 ヒント：<span id="hintCount">0</span> / 5</div>
         <div>❌ ミス：<span id="mistakeCount">0</span></div>
     </div>
 
@@ -725,6 +722,13 @@ button.number-selected {
 
     <div id="badgePanel" class="badge-panel hidden">
         <div id="badgeGrid" class="badge-grid"></div>
+    </div>
+
+    <div class="game-status">
+        <div>⏱ <span id="timer">00:00</span></div>
+        <div>❌ <span id="mistakeCount">0</span></div>
+        <div>💡 <span id="hintCount">0</span> / 5</div>
+        <div>🏆 BEST</div>
     </div>
 
     <!-- ==================================
