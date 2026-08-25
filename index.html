@@ -699,15 +699,21 @@ finish = function(correct){
   if(correct) evaluateBadges();
 };
 
-document.getElementById("badgeOpen").addEventListener("click",()=>{
-  renderBadges();
-  document.getElementById("badgeModal").classList.remove("hidden");
-});
-document.getElementById("badgeClose").addEventListener("click",()=>{
-  document.getElementById("badgeModal").classList.add("hidden");
-});
-document.getElementById("badgeModal").addEventListener("click",e=>{
-  if(e.target.id==="badgeModal")e.target.classList.add("hidden");
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("badgeOpen").addEventListener("click",()=>{
+    renderBadges();
+    document.getElementById("badgeModal").classList.remove("hidden");
+  });
+
+  document.getElementById("badgeClose").addEventListener("click",()=>{
+    document.getElementById("badgeModal").classList.add("hidden");
+  });
+
+  document.getElementById("badgeModal").addEventListener("click",e=>{
+    if(e.target.id==="badgeModal"){
+      e.target.classList.add("hidden");
+    }
+  });
 });
 
 </script>
