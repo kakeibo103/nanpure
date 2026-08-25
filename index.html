@@ -102,6 +102,31 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
   .status{margin-top:3px}
   .legend{display:none}
 }
+
+/* ===== 第5.1号：複数仮置き ===== */
+.candidate-grid{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  align-items:center;
+  justify-items:center;
+  font-size:clamp(8px,2.2vw,13px);
+  line-height:1;
+  color:#4f7482;
+  font-weight:700;
+  pointer-events:none;
+}
+.candidate-grid span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+.candidate-grid span.empty{visibility:hidden}
+
 </style>
 </head>
 <body>
@@ -232,6 +257,7 @@ let difficulty=localStorage.getItem("npDifficulty")||"normal";
 let themeName=localStorage.getItem("npTheme")||"blue";
 let solution=[], puzzle=[], board=[];
 let types=Array.from({length:9},()=>Array(9).fill(""));
+let candidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
 let selectedNumber=null, clearMode=false, pencilMode=false;
 let hintCount=0, answerMode=false, finished=false;
 let seconds=0, timerId=null;
@@ -327,6 +353,17 @@ function render(){
     }else if(board[r][c]){
       cell.textContent=board[r][c];
       if(types[r][c])cell.classList.add(types[r][c]);
+    }else if(candidates[r][c].size){
+      const grid=document.createElement("div");
+      grid.className="candidate-grid";
+      for(let n=1;n<=9;n++){
+        const span=document.createElement("span");
+        if(candidates[r][c].has(n)) span.textContent=n;
+        else span.className="empty";
+        grid.appendChild(span);
+      }
+      cell.appendChild(grid);
+      cell.classList.add("pencil");
     }
     cell.addEventListener("click",()=>tapCell(r,c,cell));
     sudoku.appendChild(cell);
@@ -336,12 +373,33 @@ function tapCell(r,c,cell){
   if(puzzle[r][c]||finished||answerMode)return;
   document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));
   cell.classList.add("selected");
-  if(clearMode){board[r][c]=0;types[r][c]="";render();return}
+  if(clearMode){
+    board[r][c]=0;
+    types[r][c]="";
+    candidates[r][c].clear();
+    render();
+    return;
+  }
+
   if(selectedNumber!==null){
-    if(board[r][c]===selectedNumber && types[r][c]===(pencilMode?"pencil":"user")){
-      board[r][c]=0;types[r][c]="";
+    if(pencilMode){
+      // 仮置きON：同じマスに複数候補を追加・削除
+      if(board[r][c]) return;
+      const set=candidates[r][c];
+      if(set.has(selectedNumber)) set.delete(selectedNumber);
+      else set.add(selectedNumber);
+      render();
+      return;
+    }
+
+    // 通常入力：確定数字を入れたら仮置き候補を消す
+    if(board[r][c]===selectedNumber && types[r][c]==="user"){
+      board[r][c]=0;
+      types[r][c]="";
     }else{
-      board[r][c]=selectedNumber;types[r][c]=pencilMode?"pencil":"user";
+      board[r][c]=selectedNumber;
+      types[r][c]="user";
+      candidates[r][c].clear();
     }
     render();
     checkComplete();
@@ -359,6 +417,7 @@ function selectClear(){
 }
 function togglePencil(){
   pencilMode=!pencilMode;
+  if(!pencilMode) selectedNumber=null;
   const b=document.getElementById("pencilButton");
   b.classList.toggle("on",pencilMode);
   b.textContent=pencilMode?"✏️ 仮置き ON":"✏️ 仮置き OFF";
@@ -369,7 +428,10 @@ function useHint(){
   for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])empty.push([r,c]);
   if(!empty.length){checkComplete();return}
   const [r,c]=empty[Math.floor(Math.random()*empty.length)];
-  board[r][c]=solution[r][c];types[r][c]="hint";hintCount++;
+  board[r][c]=solution[r][c];
+  types[r][c]="hint";
+  candidates[r][c].clear();
+  hintCount++;
   updateStatus();render();
   if(hintCount>=5)document.getElementById("answerButton").classList.remove("hidden");
 }
@@ -402,10 +464,17 @@ function showResult(correct,wrong){
 function openAnswer(){
   if(!answerMode){
     answerMode=true;
-    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]){board[r][c]=solution[r][c];types[r][c]="answer"}
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]){
+      board[r][c]=solution[r][c];
+      types[r][c]="answer";
+      candidates[r][c].clear();
+    }
     render();
   }else{
-    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(types[r][c]==="answer"){board[r][c]=0;types[r][c]=""}
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(types[r][c]==="answer"){
+      board[r][c]=0;
+      types[r][c]="";
+    }
     answerMode=false;render();
   }
 }
@@ -421,6 +490,7 @@ function actuallyNewGame(){
   document.getElementById("confirmModal").classList.add("hidden");
   finished=false;answerMode=false;hintCount=0;seconds=0;resetSelection();
   types=Array.from({length:9},()=>Array(9).fill(""));
+  candidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
   board=[];generatePuzzle();board=puzzle.map(r=>[...r]);
   document.getElementById("answerButton").classList.add("hidden");
   document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer();
