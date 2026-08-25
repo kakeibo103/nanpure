@@ -1,2108 +1,453 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ナンプレ</title>
-
 <style>
-
-/* ========================================
-   色
-======================================== */
-
-:root {
-
-    --bg: #f5eedf;
-
-    --board: #fffaf0;
-
-    /* 自分で入力 */
-    --blue: #b8d8e8;
-
-    /* ヒント */
-    --red: #efb1b1;
-
-    /* 答え */
-    --yellow: #f1dc91;
-
-    --blue-dark: #6fa8c2;
-
-    --text: #40515a;
-
-    --line: #8aa9b8;
+:root{
+  --bg:#f5eedf;
+  --board:#fffaf0;
+  --text:#40515a;
+  --line:#88aaba;
+  --user:#b9ddec;
+  --pencil:#d9c4ef;
+  --hint:#efb0b0;
+  --answer:#f1db91;
+  --accent:#4e9bc1;
+  --soft:#d9eaf0;
+  --success:#a9d9b9;
+  --danger:#e9a2a2;
+  --modal:#fffdf7;
 }
-
-
-/* ========================================
-   基本
-======================================== */
-
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+body{min-height:100vh;display:flex;justify-content:center}
+button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;color:var(--text)}
+.app{width:min(100%,560px);padding:8px 10px 14px}
+.header{position:relative;text-align:center;margin-bottom:7px}
+.title-main{font-size:26px;font-weight:800;letter-spacing:3px;line-height:1.05}
+.title-sub{font-size:13px;opacity:.65;margin-top:3px}
+.top-btn{position:absolute;top:0;width:48px;height:42px;border-radius:14px;background:rgba(255,255,255,.58);box-shadow:0 2px 7px rgba(0,0,0,.08);font-size:22px}
+#settingsOpen{left:0}
+#rulesOpen{right:0}
+.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px}
+.difficulty button{min-height:34px;border-radius:9px;background:#d8e8ed;font-weight:700}
+.difficulty button.active{background:var(--accent);color:#fff}
+.sudoku{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));background:var(--board);border:3px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 9px rgba(0,0,0,.08)}
+.cell{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,6vw,34px);font-weight:650;border-right:1px solid #c8d6da;border-bottom:1px solid #c8d6da;user-select:none;cursor:pointer;position:relative}
+.cell.br{border-right:3px solid var(--line)}
+.cell.bb{border-bottom:3px solid var(--line)}
+.cell.fixed{background:var(--board);cursor:default}
+.cell.user{background:var(--user)}
+.cell.pencil{background:var(--pencil)}
+.cell.hint{background:var(--hint);color:#7b3030}
+.cell.answer{background:var(--answer);color:#665415}
+.cell.selected{outline:3px solid var(--accent);outline-offset:-3px}
+.cell.wrong{box-shadow:inset 0 0 0 3px #d95353;background:#f2b4b4}
+.number-panel{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.number-panel button{min-height:40px;border-radius:9px;background:var(--user);font-size:18px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.number-panel button.selected{background:var(--accent);color:#fff}
+#clearButton{background:#9fc8dc;color:#fff}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.action-grid button{min-height:44px;border-radius:10px;font-weight:750}
+#hintButton{background:var(--hint)}
+#pencilButton{background:var(--pencil)}
+#pencilButton.on{box-shadow:inset 0 0 0 3px #8e5fb8}
+#newGameButton{grid-column:1/-1;background:#c9e6d0;font-size:16px}
+.status{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:nowrap;margin-top:5px;margin-bottom:0;font-size:12px;opacity:.8}
+#answerButton{width:100%;margin-top:6px;min-height:40px;border-radius:10px;background:var(--answer);font-weight:750}
+.hidden{display:none!important}
+.message{min-height:19px;text-align:center;font-size:13px;font-weight:700;margin-top:4px}
+.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:11px;opacity:.8}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:3px}
+.dot.user{background:var(--user)} .dot.pencil{background:var(--pencil)} .dot.hint{background:var(--hint)} .dot.answer{background:var(--answer)}
+.overlay{position:fixed;inset:0;background:rgba(55,65,70,.35);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal{width:min(100%,500px);max-height:90vh;overflow:auto;background:var(--modal);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-head h2{margin:0;font-size:23px}
+.close{width:38px;height:38px;border-radius:10px;background:#e5edf0;font-size:23px}
+.setting-section{background:#f7f1e6;border-radius:13px;padding:12px;margin-top:10px}
+.setting-section h3{margin:0 0 9px;font-size:16px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0}
+.setting-row select{padding:8px;border:1px solid #cbd7da;border-radius:8px;background:#fff}
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.theme{min-height:55px;border:2px solid transparent;border-radius:10px;background:#fff;text-align:left;padding:8px}
+.theme.active{border-color:var(--accent)}
+.swatches{display:flex;gap:4px;margin-bottom:4px}
+.swatch{width:20px;height:20px;border-radius:50%}
+.rule-list{margin:0;padding-left:22px;line-height:1.75}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions button{flex:1;min-height:42px;border-radius:10px;background:var(--user);font-weight:700}
+.result-icon{font-size:48px;text-align:center;margin-top:2px}
+.result-title{text-align:center;font-size:25px;font-weight:800}
+.result-text{text-align:center;margin:8px 0 14px;line-height:1.6}
+.result-ok{background:var(--success)!important}
+.result-ng{background:var(--danger)!important}
+.confirm-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.confirm-buttons button{min-height:44px;border-radius:10px;font-weight:750}
+#confirmNo{background:#e5ebed}
+#confirmYes{background:var(--accent);color:#fff}
+@media(max-height:760px){
+  .app{padding-top:4px}
+  .header{margin-bottom:4px}
+  .title-main{font-size:23px}
+  .title-sub{font-size:12px}
+  .difficulty{margin-bottom:5px}
+  .difficulty button{min-height:30px}
+  .number-panel{margin-top:5px;gap:5px}
+  .number-panel button{min-height:37px}
+  .action-grid{margin-top:5px}
+  .action-grid button{min-height:39px}
+  .status{margin-top:3px}
+  .legend{display:none}
 }
-
-
-body {
-
-    margin: 0;
-
-    min-height: 100vh;
-
-    background: var(--bg);
-
-    color: var(--text);
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
-    display: flex;
-
-    justify-content: center;
-}
-
-
-.app {
-
-    width: min(100%, 520px);
-
-    padding: 10px 10px 18px;
-}
-
-
-/* ========================================
-   ナンプレ盤
-======================================== */
-
-.sudoku {
-
-    width: 100%;
-
-    aspect-ratio: 1 / 1;
-
-    display: grid;
-
-    grid-template-columns: repeat(9, 1fr);
-
-    background: var(--board);
-
-    border: 3px solid var(--line);
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    box-shadow:
-        0 3px 8px rgba(0,0,0,0.08);
-}
-
-
-/* ========================================
-   マス
-======================================== */
-
-.cell {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: clamp(20px, 6vw, 31px);
-
-    font-weight: 600;
-
-    border-right: 1px solid #c7d5da;
-
-    border-bottom: 1px solid #c7d5da;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    -webkit-tap-highlight-color: transparent;
-}
-
-
-/* 3×3の太い線 */
-
-.cell:nth-child(3n) {
-
-    border-right: 3px solid var(--line);
-}
-
-
-.cell:nth-child(9n) {
-
-    border-right: none;
-}
-
-
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-
-    border-bottom: 3px solid var(--line);
-}
-
-
-/* ========================================
-   固定数字
-======================================== */
-
-.cell.fixed {
-
-    background: var(--board);
-
-    color: #40515a;
-
-    cursor: default;
-}
-
-
-/* ========================================
-   自分で入力した数字
-======================================== */
-
-.cell.user {
-
-    background: var(--blue);
-
-    color: #304b59;
-}
-
-
-/* ========================================
-   ヒント
-======================================== */
-
-.cell.hint {
-
-    background: var(--red);
-
-    color: #7a3030;
-}
-
-
-/* ========================================
-   答え合わせ
-======================================== */
-
-.cell.answer {
-
-    background: var(--yellow);
-
-    color: #665415;
-}
-
-
-/* ========================================
-   選択中のマス
-======================================== */
-
-.cell.selected {
-
-    outline: 3px solid var(--blue-dark);
-
-    outline-offset: -3px;
-}
-
-
-/* ========================================
-   数字ボタン
-======================================== */
-
-.number-panel {
-
-    margin-top: 10px;
-
-    display: grid;
-
-    grid-template-columns: repeat(5, 1fr);
-
-    gap: 6px;
-}
-
-
-button {
-
-    border: none;
-
-    border-radius: 9px;
-
-    padding: 9px 4px;
-
-    min-height: 42px;
-
-    font-size: 18px;
-
-    font-weight: 600;
-
-    color: var(--text);
-
-    background: var(--blue);
-
-    box-shadow:
-        0 2px 4px rgba(0,0,0,0.08);
-
-    cursor: pointer;
-
-    touch-action: manipulation;
-
-    -webkit-tap-highlight-color: transparent;
-}
-
-
-button:active {
-
-    transform: scale(0.97);
-}
-
-
-/* 数字選択中 */
-
-button.number-selected {
-
-    background: var(--blue-dark);
-
-    color: white;
-}
-
-
-/* 消す */
-
-#clearButton {
-
-    background: #9fc8dc;
-
-    color: white;
-}
-
-
-/* ========================================
-   仮置き・タイマー・バッジ
-======================================== */
-#noteButton {
-    background: #c9e1ea;
-    font-size: 16px;
-}
-#noteButton.active {
-    background: #6fa8c2;
-    color: white;
-}
-.game-status {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin-top: 8px;
-    font-size: 13px;
-    font-weight: 600;
-}
-.badge-button {
-    width: 100%;
-    margin-top: 7px;
-    background: #e5d6b8;
-    font-size: 16px;
-}
-.badge-panel {
-    margin-top: 8px;
-    padding: 10px;
-    background: rgba(255,250,240,.75);
-    border-radius: 10px;
-}
-.badge-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 7px;
-}
-.badge-card {
-    padding: 8px 5px;
-    border-radius: 9px;
-    background: #f1eadc;
-    text-align: center;
-    font-size: 12px;
-}
-.badge-icon {
-    font-size: 24px;
-    line-height: 1.1;
-}
-.badge-card.locked {
-    opacity: .55;
-    filter: grayscale(.65);
-}
-.badge-title { font-weight: 700; }
-.badge-condition { margin-top: 2px; }
-.candidate-grid {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    align-items: center;
-    justify-items: center;
-    font-size: clamp(8px, 2.1vw, 12px);
-    line-height: 1;
-    color: #55727f;
-    font-weight: 700;
-}
-.candidate-grid span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-.candidate-grid span.empty { visibility: hidden; }
-
-@media (max-height: 750px) {
-    .game-status { margin-top: 5px; font-size: 12px; gap: 14px; }
-    .badge-button { margin-top: 5px; }
-}
-
-/* ========================================
-   下の3ボタン
-======================================== */
-
-.control-buttons {
-
-    margin-top: 8px;
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    gap: 7px;
-}
-
-
-/* ヒント */
-
-#hintButton {
-
-    background: #efb1b1;
-
-    font-size: 16px;
-}
-
-
-/* 全消し */
-
-#clearAllButton {
-
-    background: #f1dc91;
-
-    font-size: 16px;
-}
-
-
-/* 新しい問題 */
-
-#newGameButton {
-
-    background: #c9e1ea;
-
-    font-size: 16px;
-}
-
-
-/* ========================================
-   ヒント使用回数
-======================================== */
-
-.hint-count {
-
-    text-align: center;
-
-    margin-top: 7px;
-
-    font-size: 13px;
-
-    line-height: 1.2;
-
-    opacity: 0.75;
-}
-
-
-/* ========================================
-   答え合わせ
-======================================== */
-
-#answerButton {
-
-    width: 100%;
-
-    margin-top: 7px;
-
-    background: var(--yellow);
-
-    font-size: 16px;
-}
-
-
-/* ========================================
-   メッセージ
-======================================== */
-
-.message {
-
-    min-height: 18px;
-
-    text-align: center;
-
-    margin-top: 5px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-
-/* ========================================
-   非表示
-======================================== */
-
-.hidden {
-
-    display: none !important;
-}
-
-
-/* ========================================
-   スマホ用さらにコンパクト
-======================================== */
-
-@media (max-height: 750px) {
-
-    .app {
-
-        padding-top: 5px;
-
-        padding-bottom: 8px;
-    }
-
-
-    .number-panel {
-
-        margin-top: 7px;
-
-        gap: 5px;
-    }
-
-
-    button {
-
-        min-height: 37px;
-
-        padding: 7px 3px;
-
-        font-size: 17px;
-    }
-
-
-    .control-buttons {
-
-        margin-top: 6px;
-
-        gap: 5px;
-    }
-
-
-    .hint-count {
-
-        margin-top: 5px;
-
-        font-size: 12px;
-    }
-
-
-    .message {
-
-        min-height: 14px;
-
-        margin-top: 3px;
-
-        font-size: 12px;
-    }
-
-}
-
-/* ========================================
-   難易度
-======================================== */
-
-.difficulty {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr;
-
-    gap: 6px;
-
-    margin-bottom: 7px;
-}
-
-
-.difficulty button {
-
-    min-height: 34px;
-
-    padding: 5px;
-
-    font-size: 15px;
-
-    background: #d8e8ed;
-
-    box-shadow: none;
-}
-
-
-.difficulty button.active {
-
-    background: #8fbfd3;
-
-    color: white;
-}
-      
 </style>
-
 </head>
-
-
 <body>
-
 <div class="app">
-      
-<div class="difficulty">
+  <div class="header">
+    <button class="top-btn" id="settingsOpen" aria-label="設定">⚙️</button>
+    <div class="title-main">🧩 ナンプレ</div>
+    <div class="title-sub">Sudoku</div>
+    <button class="top-btn" id="rulesOpen" aria-label="ルール">?</button>
+  </div>
 
-    <button
-        id="easyButton"
-        onclick="setDifficulty('easy')">
-        初級
-    </button>
+  <div class="difficulty">
+    <button data-level="easy">初級</button>
+    <button data-level="normal" class="active">中級</button>
+    <button data-level="hard">上級</button>
+  </div>
 
-    <button
-        id="normalButton"
-        onclick="setDifficulty('normal')">
-        中級
-    </button>
+  <div id="sudoku" class="sudoku"></div>
 
-    <button
-        id="hardButton"
-        onclick="setDifficulty('hard')">
-        上級
-    </button>
+  <div class="number-panel">
+    <button data-number="1">1</button><button data-number="2">2</button>
+    <button data-number="3">3</button><button data-number="4">4</button>
+    <button data-number="5">5</button><button data-number="6">6</button>
+    <button data-number="7">7</button><button data-number="8">8</button>
+    <button data-number="9">9</button><button id="clearButton">消す</button>
+  </div>
 
+  <!-- 数字ボタンのすぐ下にステータスを配置 -->
+  <div class="status">
+    <span>⏱ 経過時間 <strong id="timer">00:00</strong></span>
+    <span>💡 ヒント <strong id="hintCount">0</strong>/5</span>
+  </div>
+
+  <!-- 操作ボタン -->
+  <div class="action-grid">
+    <button id="hintButton">💡 ヒント <span id="hintRemain">残り5回</span></button>
+    <button id="pencilButton">✏️ 仮置き OFF</button>
+    <button id="newGameButton">🔄 新しい問題</button>
+  </div>
+
+  <button id="answerButton" class="hidden">答え合わせ</button>
+  <div id="message" class="message"></div>
+
+  <div class="legend">
+    <span><i class="dot user"></i>自分の入力</span>
+    <span><i class="dot pencil"></i>仮置き</span>
+    <span><i class="dot hint"></i>ヒント</span>
+    <span><i class="dot answer"></i>答え</span>
+  </div>
 </div>
 
-    <!-- ==================================
-         ナンプレ
-    =================================== -->
+<div id="settingsModal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h2>⚙️ 設定</h2><button class="close" data-close="settingsModal">×</button></div>
 
-    <div id="sudoku"
-         class="sudoku">
+    <div class="setting-section">
+      <h3>🎮 ゲーム設定</h3>
+      <div class="setting-row"><span>ヒント回数</span><select id="hintSetting"><option value="5">5回</option></select></div>
+      <div class="setting-row"><span>起動時の難易度</span><select id="defaultDifficulty"><option value="easy">初級</option><option value="normal">中級</option><option value="hard">上級</option></select></div>
     </div>
 
-
-    <!-- ==================================
-         数字ボタン
-    =================================== -->
-
-    <div class="number-panel">
-
-
-        <button
-            class="number-button"
-            data-number="1"
-            onclick="selectNumber(1)">
-            1
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="2"
-            onclick="selectNumber(2)">
-            2
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="3"
-            onclick="selectNumber(3)">
-            3
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="4"
-            onclick="selectNumber(4)">
-            4
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="5"
-            onclick="selectNumber(5)">
-            5
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="6"
-            onclick="selectNumber(6)">
-            6
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="7"
-            onclick="selectNumber(7)">
-            7
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="8"
-            onclick="selectNumber(8)">
-            8
-        </button>
-
-
-        <button
-            class="number-button"
-            data-number="9"
-            onclick="selectNumber(9)">
-            9
-        </button>
-
-
-        <button
-            id="clearButton"
-            onclick="selectClear()">
-            消す
-        </button>
-
+    <div class="setting-section">
+      <h3>🎨 色のテーマ</h3>
+      <div class="theme-grid">
+        <button class="theme active" data-theme="blue"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9ddec"></i></div>ベージュ × ブルー</button>
+        <button class="theme" data-theme="green"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9dfc3"></i></div>ベージュ × グリーン</button>
+        <button class="theme" data-theme="purple"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#d9c4ef"></i></div>ベージュ × パープル</button>
+        <button class="theme" data-theme="mono"><div class="swatches"><i class="swatch" style="background:#eee"></i><i class="swatch" style="background:#c6d0d4"></i></div>モノトーン</button>
+      </div>
     </div>
 
-
-    <!-- ==================================
-         ヒント・全消し・新しい問題
-    =================================== -->
-
-    <div class="control-buttons">
-
-        <button id="hintButton" onclick="useHint()">💡 ヒント</button>
-
-        <button id="noteButton" onclick="toggleNoteMode()">✏️ 仮置き OFF</button>
-
-        <button id="newGameButton" onclick="newGame()">新しい問題</button>
-
+    <div class="setting-section">
+      <h3>📖 ルール説明</h3>
+      <ol class="rule-list">
+        <li>1〜9の数字を使います。</li>
+        <li>縦の列に同じ数字を入れません。</li>
+        <li>横の行に同じ数字を入れません。</li>
+        <li>太線で囲まれた3×3ブロックにも同じ数字を入れません。</li>
+        <li>すべての空欄を正しく埋めたらクリアです。</li>
+      </ol>
     </div>
-<div>💡 ヒント：<span id="hintCount">0</span> / 5</div>
-        <div>❌ ミス：<span id="mistakeCount">0</span></div>
-    </div>
-
-    <button id="badgeButton" class="badge-button" onclick="toggleBadges()">🏆 バッジコレクション</button>
-
-    <div id="badgePanel" class="badge-panel hidden">
-        <div id="badgeGrid" class="badge-grid"></div>
-    </div>
-
-    <div class="game-status">
-        <div>⏱ <span id="timer">00:00</span></div>
-        <div>❌ <span id="mistakeCount">0</span></div>
-        <div>💡 <span id="hintCount">0</span> / 5</div>
-        <div>🏆 BEST</div>
-    </div>
-
-    <!-- ==================================
-         ヒント回数
-    =================================== -->
-
-
-    <!-- ==================================
-         答え合わせ
-         最初は非表示
-    =================================== -->
-
-    <button
-        id="answerButton"
-        class="hidden"
-        onclick="checkAnswer()">
-
-        答え合わせ
-
-    </button>
-
-
-    <!-- メッセージ -->
-
-    <div
-        id="message"
-        class="message">
-    </div>
-
-
+    <div class="modal-actions"><button data-close="settingsModal">閉じる</button></div>
+  </div>
 </div>
 
+<div id="rulesModal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-head"><h2>📖 ナンプレのルール</h2><button class="close" data-close="rulesModal">×</button></div>
+    <div class="setting-section">
+      <ol class="rule-list">
+        <li>空欄に1〜9の数字を入れます。</li>
+        <li>同じ横一列に同じ数字は入りません。</li>
+        <li>同じ縦一列に同じ数字は入りません。</li>
+        <li>3×3のブロックにも同じ数字は入りません。</li>
+        <li>すべて正しく埋めるとクリアです。</li>
+      </ol>
+    </div>
+    <div class="modal-actions"><button data-close="rulesModal">閉じる</button></div>
+  </div>
+</div>
+
+<div id="confirmModal" class="overlay hidden">
+  <div class="modal">
+    <div class="result-icon">🔄</div>
+    <div class="result-title">新しい問題</div>
+    <div class="result-text">現在の問題を終了して、<br>新しい問題に進みますか？</div>
+    <div class="confirm-buttons"><button id="confirmNo">いいえ</button><button id="confirmYes">はい</button></div>
+  </div>
+</div>
+
+<div id="resultModal" class="overlay hidden">
+  <div class="modal">
+    <div id="resultIcon" class="result-icon">🎉</div>
+    <div id="resultTitle" class="result-title">正解！</div>
+    <div id="resultText" class="result-text"></div>
+    <div class="modal-actions"><button id="resultOk" class="result-ok">OK</button></div>
+  </div>
+</div>
 
 <script>
-
-
-/* ========================================
-   問題1
-======================================== */
-
-const puzzle1 = [
-
- /* ========================================
-   難易度
-======================================== */
-
-let difficulty = "normal";
-
-
-/* ========================================
-   難易度ごとの空欄数
-======================================== */
-
-const difficultySettings = {
-
-    easy: {
-        remove: 38
-    },
-
-    normal: {
-        remove: 48
-    },
-
-    hard: {
-        remove: 56
-    }
-
+const THEMES={
+  blue:{bg:"#f5eedf",board:"#fffaf0",user:"#b9ddec",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#4e9bc1",line:"#88aaba",soft:"#d9eaf0",success:"#a9d9b9",danger:"#e9a2a2"},
+  green:{bg:"#f5eedf",board:"#fffaf0",user:"#b9dfc3",pencil:"#d8c8ed",hint:"#efb0b0",answer:"#f1db91",accent:"#5ea47a",line:"#8eaf9c",soft:"#dcecdf",success:"#a9d9b9",danger:"#e9a2a2"},
+  purple:{bg:"#f5eedf",board:"#fffaf0",user:"#c5dff0",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#8b71b2",line:"#9e91b5",soft:"#e6def0",success:"#b8d9c4",danger:"#e9a2a2"},
+  mono:{bg:"#eeeeeb",board:"#fafaf8",user:"#cbd5d9",pencil:"#d9d9d9",hint:"#d7b4b4",answer:"#e2d39a",accent:"#71828b",line:"#87969d",soft:"#e0e5e7",success:"#b8cbbd",danger:"#dfb1b1"}
 };
+let difficulty=localStorage.getItem("npDifficulty")||"normal";
+let themeName=localStorage.getItem("npTheme")||"blue";
+let solution=[], puzzle=[], board=[];
+let types=Array.from({length:9},()=>Array(9).fill(""));
+let selectedNumber=null, clearMode=false, pencilMode=false;
+let hintCount=0, answerMode=false, finished=false;
+let seconds=0, timerId=null;
 
+const sudoku=document.getElementById("sudoku");
+const msg=document.getElementById("message");
 
-/* ========================================
-   現在の問題
-======================================== */
-
-let originalPuzzle = [];
-
-let solution = [];
-
-
-/* ========================================
-   盤面をコピー
-======================================== */
-
-function copyBoard(board) {
-
-    return board.map(row => [...row]);
-
+function applyTheme(name){
+  themeName=name; localStorage.setItem("npTheme",name);
+  const t=THEMES[name];
+  for(const [k,v] of Object.entries(t)) document.documentElement.style.setProperty("--"+k,v);
+  document.querySelectorAll(".theme").forEach(b=>b.classList.toggle("active",b.dataset.theme===name));
 }
-
-
-/* ========================================
-   数字をシャッフル
-======================================== */
-
-function shuffle(array) {
-
-    const result = [...array];
-
-
-    for (
-        let i = result.length - 1;
-        i > 0;
-        i--
-    ) {
-
-        const j =
-            Math.floor(
-                Math.random() * (i + 1)
-            );
-
-
-        [
-            result[i],
-            result[j]
-        ] =
-        [
-            result[j],
-            result[i]
-        ];
-
+function shuffle(a){
+  a=[...a];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+function candidates(g,r,c){
+  const used=new Set();
+  for(let i=0;i<9;i++){if(g[r][i])used.add(g[r][i]);if(g[i][c])used.add(g[i][c])}
+  const sr=Math.floor(r/3)*3, sc=Math.floor(c/3)*3;
+  for(let rr=sr;rr<sr+3;rr++)for(let cc=sc;cc<sc+3;cc++)if(g[rr][cc])used.add(g[rr][cc]);
+  return [1,2,3,4,5,6,7,8,9].filter(n=>!used.has(n));
+}
+function makeSolution(){
+  const g=Array.from({length:9},()=>Array(9).fill(0));
+  function solve(){
+    let br=-1,bc=-1,best=null;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+      if(g[r][c])continue;
+      const cs=candidates(g,r,c);
+      if(!cs.length)return false;
+      if(!best||cs.length<best.length){br=r;bc=c;best=cs}
     }
-
-
-    return result;
-
+    if(!best)return true;
+    for(const n of shuffle(best)){g[br][bc]=n;if(solve())return true;g[br][bc]=0}
+    return false;
+  }
+  solve(); return g;
 }
-
-
-/* ========================================
-   完成した数独を作る
-======================================== */
-
-function generateSolution() {
-
-
-    const board =
-        Array.from(
-            { length: 9 },
-            () => Array(9).fill(0)
-        );
-
-
-    function isValid(row, col, number) {
-
-
-        /* 横 */
-
-        for (let c = 0; c < 9; c++) {
-
-            if (
-                board[row][c] === number
-            ) {
-
-                return false;
-
-            }
-
-        }
-
-
-        /* 縦 */
-
-        for (let r = 0; r < 9; r++) {
-
-            if (
-                board[r][col] === number
-            ) {
-
-                return false;
-
-            }
-
-        }
-
-
-        /* 3×3 */
-
-        const startRow =
-            Math.floor(row / 3) * 3;
-
-        const startCol =
-            Math.floor(col / 3) * 3;
-
-
-        for (
-            let r = startRow;
-            r < startRow + 3;
-            r++
-        ) {
-
-            for (
-                let c = startCol;
-                c < startCol + 3;
-                c++
-            ) {
-
-                if (
-                    board[r][c] === number
-                ) {
-
-                    return false;
-
-                }
-
-            }
-
-        }
-
-
-        return true;
-
+function countSolutions(g,limit=2){
+  let count=0;
+  function solve(){
+    if(count>=limit)return;
+    let br=-1,bc=-1,best=null;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+      if(g[r][c])continue;
+      const cs=candidates(g,r,c);
+      if(!cs.length)return;
+      if(!best||cs.length<best.length){br=r;bc=c;best=cs}
     }
-
-
-    function solve() {
-
-
-        for (let row = 0; row < 9; row++) {
-
-            for (let col = 0; col < 9; col++) {
-
-
-                if (board[row][col] === 0) {
-
-
-                    const numbers =
-                        shuffle(
-                            [1,2,3,4,5,6,7,8,9]
-                        );
-
-
-                    for (
-                        const number of numbers
-                    ) {
-
-
-                        if (
-                            isValid(
-                                row,
-                                col,
-                                number
-                            )
-                        ) {
-
-
-                            board[row][col] =
-                                number;
-
-
-                            if (solve()) {
-
-                                return true;
-
-                            }
-
-
-                            board[row][col] =
-                                0;
-
-                        }
-
-                    }
-
-
-                    return false;
-
-                }
-
-            }
-
-        }
-
-
-        return true;
-
+    if(!best){count++;return}
+    for(const n of best){g[br][bc]=n;solve();g[br][bc]=0;if(count>=limit)return}
+  }
+  solve(); return count;
+}
+function generatePuzzle(){
+  const remove={easy:34,normal:44,hard:50}[difficulty];
+  for(let attempt=0;attempt<10;attempt++){
+    const solved=makeSolution(), p=solved.map(r=>[...r]);
+    let removed=0;
+    for(const pos of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){
+      if(removed>=remove)break;
+      const [r,c]=pos, old=p[r][c]; p[r][c]=0;
+      if(countSolutions(p.map(r=>[...r]))===1)removed++; else p[r][c]=old;
     }
-
-
-    solve();
-
-
-    return board;
-
+    if(removed>=remove){solution=solved;puzzle=p;return}
+  }
+  solution=makeSolution();
+  puzzle=solution.map(r=>[...r]);
+  const remove={easy:34,normal:44,hard:50}[difficulty];
+  for(const [r,c] of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9])))puzzle[r][c]=0;
 }
-
-
-/* ========================================
-   問題を作る
-======================================== */
-
-function generatePuzzle() {
-
-
-    /* 完成形を作る */
-
-    solution =
-        generateSolution();
-
-
-    /* コピー */
-
-    originalPuzzle =
-        copyBoard(solution);
-
-
-    const removeCount =
-        difficultySettings[
-            difficulty
-        ].remove;
-
-
-    /* 消すマス */
-
-    const positions = [];
-
-
-    for (let row = 0; row < 9; row++) {
-
-        for (let col = 0; col < 9; col++) {
-
-            positions.push({
-                row: row,
-                col: col
-            });
-
-        }
-
+function resetSelection(){
+  selectedNumber=null; clearMode=false;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("clearButton").classList.remove("selected");
+}
+function render(){
+  sudoku.innerHTML="";
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++){
+    const cell=document.createElement("div");
+    cell.className="cell";
+    if(c===2||c===5)cell.classList.add("br");
+    if(r===2||r===5)cell.classList.add("bb");
+    if(puzzle[r][c]){
+      cell.textContent=puzzle[r][c];cell.classList.add("fixed");
+    }else if(board[r][c]){
+      cell.textContent=board[r][c];
+      if(types[r][c])cell.classList.add(types[r][c]);
     }
-
-
-    /* ランダムに並べる */
-
-    const shuffled =
-        shuffle(positions);
-
-
-    /* 指定数だけ消す */
-
-    for (
-        let i = 0;
-        i < removeCount;
-        i++
-    ) {
-
-
-        const position =
-            shuffled[i];
-
-
-        originalPuzzle[
-            position.row
-        ][
-            position.col
-        ] = 0;
-
+    cell.addEventListener("click",()=>tapCell(r,c,cell));
+    sudoku.appendChild(cell);
+  }
+}
+function tapCell(r,c,cell){
+  if(puzzle[r][c]||finished||answerMode)return;
+  document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));
+  cell.classList.add("selected");
+  if(clearMode){board[r][c]=0;types[r][c]="";render();return}
+  if(selectedNumber!==null){
+    if(board[r][c]===selectedNumber && types[r][c]===(pencilMode?"pencil":"user")){
+      board[r][c]=0;types[r][c]="";
+    }else{
+      board[r][c]=selectedNumber;types[r][c]=pencilMode?"pencil":"user";
     }
-
+    render();
+    checkComplete();
+  }
 }
-
-
-/* ========================================
-   難易度変更
-======================================== */
-
-function setDifficulty(level) {
-
-
-    difficulty = level;
-
-
-    /* ボタン表示 */
-
-    document
-        .querySelectorAll(".difficulty button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "active"
-            );
-
-        });
-
-
-    if (level === "easy") {
-
-        document
-            .getElementById("easyButton")
-            .classList.add("active");
-
-    }
-
-
-    if (level === "normal") {
-
-        document
-            .getElementById("normalButton")
-            .classList.add("active");
-
-    }
-
-
-    if (level === "hard") {
-
-        document
-            .getElementById("hardButton")
-            .classList.add("active");
-
-    }
-
-
-    /* 新しい問題を作る */
-
-    startNewPuzzle();
-
+function selectNumber(n){
+  selectedNumber=n;clearMode=false;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.toggle("selected",+b.dataset.number===n));
+  document.getElementById("clearButton").classList.remove("selected");
 }
-
-
-/* ========================================
-   新しい問題を開始
-======================================== */
-
-function startNewPuzzle() {
-
-
-    generatePuzzle();
-
-
-    board =
-        copyBoard(originalPuzzle);
-
-
-    cellType =
-        Array.from(
-            { length: 9 },
-            () => Array(9).fill("")
-        );
-
-
-    selectedNumber = null;
-
-    clearMode = false;
-
-    hintCount = 0;
-
-    answerMode = false;
-    noteMode = false;
-    gameCompleted = false;
-    mistakeCount = 0;
-    candidates = Array.from(
-        { length: 9 },
-        () => Array.from({ length: 9 }, () => new Set())
-    );
-    resetTimer();
-    updateNoteButton();
-
-
-    document
-        .getElementById("hintCount")
-        .textContent = "0";
-
-    const mistakeEl = document.getElementById("mistakeCount");
-    if (mistakeEl) mistakeEl.textContent = "0";
-
-
-    document
-        .getElementById("answerButton")
-        .classList.add("hidden");
-
-
-    document
-        .querySelectorAll(".number-button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById("clearButton")
-        .classList.remove(
-            "number-selected"
-        );
-
-
-    createBoard();
-
+function selectClear(){
+  selectedNumber=null;clearMode=true;
+  document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("clearButton").classList.add("selected");
 }
-
-const puzzles = [
-
-    {
-        puzzle: puzzle1,
-        solution: solution1
-    }
-
-];
-
-
-/* 現在の問題 */
-
-let currentPuzzleIndex = 0;
-
-
-/* 現在の問題 */
-
-let originalPuzzle =
-    puzzles[currentPuzzleIndex].puzzle;
-
-
-/* 正解 */
-
-let solution =
-    puzzles[currentPuzzleIndex].solution;
-
-
-/* ========================================
-   現在の盤面
-======================================== */
-
-let board =
-    originalPuzzle.map(row => [...row]);
-
-
-/* ========================================
-   マスの種類
-
-   ""       = 空
-   user     = 自分で入力
-   hint     = ヒント
-   answer   = 答え
-======================================== */
-
-let cellType =
-    Array.from(
-        { length: 9 },
-        () => Array(9).fill("")
-    );
-
-
-/* ========================================
-   選択中の数字
-======================================== */
-
-let selectedNumber = null;
-
-
-/* 消すモード */
-
-let clearMode = false;
-
-
-/* ヒント回数 */
-
-let hintCount = 0;
-
-
-/* 答え表示中 */
-
-let answerMode = false;
-
-/* 仮置き候補：1マスに複数数字 */
-let candidates = Array.from(
-    { length: 9 },
-    () => Array.from({ length: 9 }, () => new Set())
-);
-let noteMode = false;
-
-/* タイマー */
-let elapsedSeconds = 0;
-let timerInterval = null;
-let gameCompleted = false;
-let mistakeCount = 0;
-
-/* バッジ */
-const badgeDefinitions = [
-    {id:"easyBronze",icon:"🥉",title:"初級 ブロンズ",condition:"初級を10分以内",type:"time",difficulty:"easy",limit:600},
-    {id:"easySilver",icon:"🥈",title:"初級 シルバー",condition:"初級を7分以内",type:"time",difficulty:"easy",limit:420},
-    {id:"easyGold",icon:"🥇",title:"初級 ゴールド",condition:"初級を5分以内",type:"time",difficulty:"easy",limit:300},
-    {id:"easyPlatinum",icon:"💎",title:"初級 プラチナ",condition:"初級を3分以内",type:"time",difficulty:"easy",limit:180},
-    {id:"normalBronze",icon:"🥉",title:"中級 ブロンズ",condition:"中級を20分以内",type:"time",difficulty:"normal",limit:1200},
-    {id:"normalSilver",icon:"🥈",title:"中級 シルバー",condition:"中級を14分以内",type:"time",difficulty:"normal",limit:840},
-    {id:"normalGold",icon:"🥇",title:"中級 ゴールド",condition:"中級を10分以内",type:"time",difficulty:"normal",limit:600},
-    {id:"normalPlatinum",icon:"💎",title:"中級 プラチナ",condition:"中級を7分以内",type:"time",difficulty:"normal",limit:420},
-    {id:"hardBronze",icon:"🥉",title:"上級 ブロンズ",condition:"上級を35分以内",type:"time",difficulty:"hard",limit:2100},
-    {id:"hardSilver",icon:"🥈",title:"上級 シルバー",condition:"上級を25分以内",type:"time",difficulty:"hard",limit:1500},
-    {id:"hardGold",icon:"🥇",title:"上級 ゴールド",condition:"上級を18分以内",type:"time",difficulty:"hard",limit:1080},
-    {id:"hardPlatinum",icon:"💎",title:"上級 プラチナ",condition:"上級を12分以内",type:"time",difficulty:"hard",limit:720},
-    {id:"perfect",icon:"🎯",title:"パーフェクト",condition:"間違い0回でクリア",type:"perfect"},
-    {id:"noHint",icon:"💡",title:"自力攻略",condition:"ヒント0回でクリア",type:"noHint"},
-    {id:"speedStar",icon:"⚡",title:"スピードスター",condition:"5分以内＋ヒント0回",type:"speedStar"},
-    {id:"threeWins",icon:"🔥",title:"3連勝",condition:"3問連続クリア",type:"threeWins"}
-];
-
-let consecutiveWins = Number(localStorage.getItem("sudokuConsecutiveWins") || "0");
-let bestTimes = JSON.parse(localStorage.getItem("sudokuBestTimes") || "{}");
-let unlockedBadges = JSON.parse(localStorage.getItem("sudokuBadges") || "{}");
-
-
-/* ========================================
-   盤面を作る
-======================================== */
-
-function createBoard() {
-
-    const sudoku =
-        document.getElementById("sudoku");
-
-
-    sudoku.innerHTML = "";
-
-
-    for (let row = 0; row < 9; row++) {
-
-        for (let col = 0; col < 9; col++) {
-
-
-            const cell =
-                document.createElement("div");
-
-
-            cell.className = "cell";
-
-
-            /* 固定数字 */
-
-            if (
-                originalPuzzle[row][col] !== 0
-            ) {
-
-                cell.textContent =
-                    originalPuzzle[row][col];
-
-                cell.classList.add("fixed");
-
-            }
-
-
-            /* プレイヤーが入力 */
-
-            else if (
-                board[row][col] !== 0
-            ) {
-
-                cell.textContent =
-                    board[row][col];
-
-
-                if (
-                    cellType[row][col] === "user"
-                ) {
-
-                    cell.classList.add("user");
-
-                }
-
-
-                if (
-                    cellType[row][col] === "hint"
-                ) {
-
-                    cell.classList.add("hint");
-
-                }
-
-
-                if (
-                    cellType[row][col] === "answer"
-                ) {
-
-                    cell.classList.add("answer");
-
-                }
-
-            }            /* 仮置き候補 */
-            if (
-                originalPuzzle[row][col] === 0 &&
-                board[row][col] === 0 &&
-                candidates[row][col].size > 0
-            ) {
-                const grid = document.createElement("div");
-                grid.className = "candidate-grid";
-
-                for (let n = 1; n <= 9; n++) {
-                    const span = document.createElement("span");
-                    if (candidates[row][col].has(n)) {
-                        span.textContent = n;
-                    } else {
-                        span.classList.add("empty");
-                    }
-                    grid.appendChild(span);
-                }
-                cell.appendChild(grid);
-            }
-
-
-
-
-            /* ==================================
-               マスをタップ
-            ================================== */
-
-            cell.addEventListener(
-                "click",
-                function() {
-
-
-                    /* 固定数字 */
-
-                    if (
-                        originalPuzzle[row][col] !== 0
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    /* 答え表示中 */
-
-                    if (answerMode) {
-
-                        return;
-
-                    }
-
-
-                    /* 仮置きモード */
-                    if (noteMode && selectedNumber !== null) {
-                        const set = candidates[row][col];
-
-                        if (set.has(selectedNumber)) {
-                            set.delete(selectedNumber);
-                        } else {
-                            set.add(selectedNumber);
-                        }
-
-                        createBoard();
-                        return;
-                    }
-
-                    /* 数字入力 */
-                    if (selectedNumber !== null) {
-
-                        board[row][col] = selectedNumber;
-                        candidates[row][col].clear();
-
-                        if (selectedNumber !== solution[row][col]) {
-                            mistakeCount++;
-                        }
-                        cellType[row][col] = "user";
-
-                        createBoard();
-                        checkSolved();
-                        return;
-                    }
-
-
-                    /* 消す */
-
-                    if (clearMode) {
-
-                        board[row][col] = 0;
-                        candidates[row][col].clear();
-
-                        cellType[row][col] =
-                            "";
-
-
-                        cell.textContent = "";
-
-
-                        cell.classList.remove(
-                            "user",
-                            "hint",
-                            "answer"
-                        );
-
-
-                        highlightCell(cell);
-
-
-                        return;
-
-                    }
-
-
-                    highlightCell(cell);
-
-                }
-            );
-
-
-            sudoku.appendChild(cell);
-
-        }
-
-    }
-
+function togglePencil(){
+  pencilMode=!pencilMode;
+  const b=document.getElementById("pencilButton");
+  b.classList.toggle("on",pencilMode);
+  b.textContent=pencilMode?"✏️ 仮置き ON":"✏️ 仮置き OFF";
 }
-
-
-/* ========================================
-   数字を選択
-======================================== */
-
-function selectNumber(number) {
-
-    selectedNumber = number;
-
-    clearMode = false;
-
-
-    document
-        .querySelectorAll(".number-button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    const button =
-        document.querySelector(
-            `.number-button[data-number="${number}"]`
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "number-selected"
-        );
-
-    }
-
-
-    document
-        .getElementById("clearButton")
-        .classList.remove(
-            "number-selected"
-        );
-
+function useHint(){
+  if(finished||answerMode||hintCount>=5)return;
+  const empty=[];
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])empty.push([r,c]);
+  if(!empty.length){checkComplete();return}
+  const [r,c]=empty[Math.floor(Math.random()*empty.length)];
+  board[r][c]=solution[r][c];types[r][c]="hint";hintCount++;
+  updateStatus();render();
+  if(hintCount>=5)document.getElementById("answerButton").classList.remove("hidden");
 }
-
-
-function toggleNoteMode() {
-    noteMode = !noteMode;
-    clearMode = false;
-    selectedNumber = null;
-
-    document.querySelectorAll(".number-button").forEach(button => {
-        button.classList.remove("number-selected");
-    });
-    document.getElementById("clearButton").classList.remove("number-selected");
-    updateNoteButton();
+function updateStatus(){
+  document.getElementById("hintCount").textContent=hintCount;
+  document.getElementById("hintRemain").textContent="残り"+(5-hintCount)+"回";
 }
-
-function updateNoteButton() {
-    const button = document.getElementById("noteButton");
-    if (!button) return;
-    button.textContent = noteMode ? "✏️ 仮置き ON" : "✏️ 仮置き OFF";
-    button.classList.toggle("active", noteMode);
+function checkComplete(){
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])return;
+  let wrong=0;
+  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(board[r][c]!==solution[r][c])wrong++;
+  if(wrong===0)finish(true);
+  else showResult(false,wrong);
 }
-
-function formatTime(seconds) {
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+function finish(correct){
+  finished=true;stopTimer();
+  showResult(true,0);
 }
-
-function resetTimer() {
-    clearInterval(timerInterval);
-    elapsedSeconds = 0;
-    const timer = document.getElementById("timer");
-    if (timer) timer.textContent = "00:00";
-
-    timerInterval = setInterval(() => {
-        if (!gameCompleted && !answerMode) {
-            elapsedSeconds++;
-            const el = document.getElementById("timer");
-            if (el) el.textContent = formatTime(elapsedSeconds);
-        }
-    }, 1000);
+function showResult(correct,wrong){
+  const icon=document.getElementById("resultIcon"),title=document.getElementById("resultTitle"),text=document.getElementById("resultText"),ok=document.getElementById("resultOk");
+  if(correct){
+    icon.textContent="🎉";title.textContent="正解！";text.innerHTML=`すべてのマスが正しく埋まりました！<br><strong>クリアタイム　${formatTime(seconds)}</strong><br>ヒント使用回数　${hintCount} / 5`;
+    ok.className="result-ok";
+  }else{
+    icon.textContent="❌";title.textContent=`あと ${wrong} 個違います`;text.innerHTML="間違っているマスを確認して、もう一度挑戦してみましょう。";ok.className="result-ng";
+    document.querySelectorAll(".cell").forEach((cell,i)=>{const r=Math.floor(i/9),c=i%9;if(!puzzle[r][c]&&board[r][c]&&board[r][c]!==solution[r][c])cell.classList.add("wrong")});
+  }
+  document.getElementById("resultModal").classList.remove("hidden");
 }
-
-function isSolved() {
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            if (board[row][col] !== solution[row][col]) return false;
-        }
-    }
-    return true;
+function openAnswer(){
+  if(!answerMode){
+    answerMode=true;
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]){board[r][c]=solution[r][c];types[r][c]="answer"}
+    render();
+  }else{
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(types[r][c]==="answer"){board[r][c]=0;types[r][c]=""}
+    answerMode=false;render();
+  }
 }
-
-function unlockBadges() {
-    const time = elapsedSeconds;
-    const newly = [];
-
-    badgeDefinitions.forEach(b => {
-        let ok = false;
-
-        if (b.type === "time") {
-            ok = difficulty === b.difficulty && time <= b.limit;
-        } else if (b.type === "perfect") {
-            ok = mistakeCount === 0;
-        } else if (b.type === "noHint") {
-            ok = hintCount === 0;
-        } else if (b.type === "speedStar") {
-            ok = time <= 300 && hintCount === 0;
-        } else if (b.type === "threeWins") {
-            ok = consecutiveWins >= 3;
-        }
-
-        if (ok && !unlockedBadges[b.id]) {
-            unlockedBadges[b.id] = true;
-            newly.push(b);
-        }
-    });
-
-    localStorage.setItem("sudokuBadges", JSON.stringify(unlockedBadges));
-    return newly;
+function startTimer(){
+  stopTimer();timerId=setInterval(()=>{if(!finished&&!answerMode){seconds++;document.getElementById("timer").textContent=formatTime(seconds)}},1000);
 }
-
-function checkSolved() {
-    if (gameCompleted || !isSolved()) return;
-
-    gameCompleted = true;
-    clearInterval(timerInterval);
-
-    const oldBest = bestTimes[difficulty];
-    if (!oldBest || elapsedSeconds < oldBest) {
-        bestTimes[difficulty] = elapsedSeconds;
-        localStorage.setItem("sudokuBestTimes", JSON.stringify(bestTimes));
-    }
-
-    consecutiveWins++;
-    localStorage.setItem("sudokuConsecutiveWins", String(consecutiveWins));
-
-    const newly = unlockBadges();
-    const recordText = !oldBest || elapsedSeconds < oldBest
-        ? "🏆 新記録更新！"
-        : `自己ベスト ${formatTime(bestTimes[difficulty])}`;
-
-    document.getElementById("message").textContent =
-        newly.length
-            ? `🎉 正解！ ${formatTime(elapsedSeconds)}　${recordText}　🏅 ${newly[0].title} 獲得！`
-            : `🎉 正解！ ${formatTime(elapsedSeconds)}　${recordText}`;
-
-    renderBadges();
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function newGame(){
+  document.getElementById("confirmModal").classList.remove("hidden");
 }
-
-function toggleBadges() {
-    document.getElementById("badgePanel").classList.toggle("hidden");
-    renderBadges();
+function actuallyNewGame(){
+  document.getElementById("confirmModal").classList.add("hidden");
+  finished=false;answerMode=false;hintCount=0;seconds=0;resetSelection();
+  types=Array.from({length:9},()=>Array(9).fill(""));
+  board=[];generatePuzzle();board=puzzle.map(r=>[...r]);
+  document.getElementById("answerButton").classList.add("hidden");
+  document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer();
 }
-
-function renderBadges() {
-    const grid = document.getElementById("badgeGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
-
-    badgeDefinitions.forEach(b => {
-        const card = document.createElement("div");
-        card.className = "badge-card" + (unlockedBadges[b.id] ? "" : " locked");
-        card.innerHTML = `
-            <div class="badge-icon">${unlockedBadges[b.id] ? b.icon : "🔒"}</div>
-            <div class="badge-title">${b.title}</div>
-            <div class="badge-condition">${b.condition}</div>
-        `;
-        grid.appendChild(card);
-    });
+function setDifficulty(level){
+  difficulty=level;localStorage.setItem("npDifficulty",level);
+  document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===level));
+  actuallyNewGame();
 }
-
-/* ========================================
-   消す
-======================================== */
-
-function selectClear() {
-
-    selectedNumber = null;
-
-    clearMode = true;
-
-
-    document
-        .querySelectorAll(".number-button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById("clearButton")
-        .classList.add(
-            "number-selected"
-        );
-
-}
-
-
-/* ========================================
-   ヒント
-======================================== */
-
-function useHint() {
-
-
-    /* 5回使用済み */
-
-    if (hintCount >= 5) {
-
-        return;
-
-    }
-
-
-    /* 答え表示中 */
-
-    if (answerMode) {
-
-        return;
-
-    }
-
-
-    /* 空欄を探す */
-
-    const emptyCells = [];
-
-
-    for (let row = 0; row < 9; row++) {
-
-        for (let col = 0; col < 9; col++) {
-
-            if (
-
-                originalPuzzle[row][col] === 0 &&
-
-                board[row][col] === 0
-
-            ) {
-
-                emptyCells.push({
-                    row: row,
-                    col: col
-                });
-
-            }
-
-        }
-
-    }
-
-
-    /* 空欄なし */
-
-    if (emptyCells.length === 0) {
-
-        return;
-
-    }
-
-
-    /* ランダムで1マス */
-
-    const target =
-        emptyCells[
-            Math.floor(
-                Math.random() *
-                emptyCells.length
-            )
-        ];
-
-
-    const row = target.row;
-
-    const col = target.col;
-
-
-    /* 正解を入力 */
-
-    board[row][col] =
-        solution[row][col];
-
-    candidates[row][col].clear();
-
-    cellType[row][col] =
-        "hint";
-
-
-    hintCount++;
-
-
-    /* 表示更新 */
-
-    document
-        .getElementById("hintCount")
-        .textContent = hintCount;
-
-
-    /* 5回になったら答え合わせを表示 */
-
-    if (hintCount >= 5) {
-
-        document
-            .getElementById("answerButton")
-            .classList.remove("hidden");
-
-    }
-
-
-    createBoard();
-
-}
-
-
-/* ========================================
-   全消し
-======================================== */
-
-function clearAll() {
-
-
-    /* 答え表示中なら解除 */
-
-    answerMode = false;
-
-
-    /* 全入力を消す */
-
-    for (let row = 0; row < 9; row++) {
-
-        for (let col = 0; col < 9; col++) {
-
-
-            if (
-                originalPuzzle[row][col] === 0
-            ) {
-
-                board[row][col] = 0;
-
-                cellType[row][col] = "";
-
-            }
-
-        }
-
-    }
-
-
-    /* 数字選択解除 */
-
-    selectedNumber = null;
-
-    clearMode = false;
-
-
-    document
-        .querySelectorAll(".number-button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById("clearButton")
-        .classList.remove(
-            "number-selected"
-        );
-
-
-    createBoard();
-
-}
-
-
-/* ========================================
-   答え合わせ
-======================================== */
-
-function checkAnswer() {
-
-
-    /* すでに表示中なら消す */
-
-    if (answerMode) {
-
-
-        for (let row = 0; row < 9; row++) {
-
-            for (let col = 0; col < 9; col++) {
-
-
-                if (
-                    cellType[row][col] ===
-                    "answer"
-                ) {
-
-                    board[row][col] = 0;
-
-                    cellType[row][col] = "";
-
-                }
-
-            }
-
-        }
-
-
-        answerMode = false;
-
-
-        createBoard();
-
-
-        return;
-
-    }
-
-
-    /* 残りを全部正解で埋める */
-
-    for (let row = 0; row < 9; row++) {
-
-        for (let col = 0; col < 9; col++) {
-
-
-            if (
-
-                originalPuzzle[row][col] === 0 &&
-
-                board[row][col] === 0
-
-            ) {
-
-                board[row][col] =
-                    solution[row][col];
-
-
-                cellType[row][col] =
-                    "answer";
-
-            }
-
-        }
-
-    }
-
-
-    answerMode = true;
-
-
-    createBoard();
-
-}
-
-
-/* ========================================
-   マス選択
-======================================== */
-
-function highlightCell(cell) {
-
-    document
-        .querySelectorAll(".cell")
-        .forEach(c => {
-
-            c.classList.remove(
-                "selected"
-            );
-
-        });
-
-
-    cell.classList.add(
-        "selected"
-    );
-
-}
-
-
-/* ========================================
-   新しい問題
-======================================== */
-
-function newGame() {
-
-  startNewPuzzle();   
-
-    }
-
-
-    originalPuzzle =
-        puzzles[currentPuzzleIndex].puzzle;
-
-
-    solution =
-        puzzles[currentPuzzleIndex].solution;
-
-
-    board =
-        originalPuzzle.map(row => [...row]);
-
-
-    cellType =
-        Array.from(
-            { length: 9 },
-            () => Array(9).fill("")
-        );
-
-
-    selectedNumber = null;
-
-    clearMode = false;
-
-    hintCount = 0;
-
-    answerMode = false;
-
-
-    document
-        .getElementById("hintCount")
-        .textContent = "0";
-
-
-    document
-        .getElementById("answerButton")
-        .classList.add("hidden");
-
-
-    document
-        .querySelectorAll(".number-button")
-        .forEach(button => {
-
-            button.classList.remove(
-                "number-selected"
-            );
-
-        });
-
-
-    document
-        .getElementById("clearButton")
-        .classList.remove(
-            "number-selected"
-        );
-
-createBoard();
-
-}
-
-
-/* ========================================
-   起動
-======================================== */
-
-setDifficulty("normal");
-renderBadges();
-
+function openModal(id){document.getElementById(id).classList.remove("hidden")}
+function closeModal(id){document.getElementById(id).classList.add("hidden")}
+
+document.querySelectorAll("[data-number]").forEach(b=>b.addEventListener("click",()=>selectNumber(+b.dataset.number)));
+document.getElementById("clearButton").addEventListener("click",selectClear);
+document.getElementById("hintButton").addEventListener("click",useHint);
+document.getElementById("pencilButton").addEventListener("click",togglePencil);
+document.getElementById("newGameButton").addEventListener("click",newGame);
+document.getElementById("answerButton").addEventListener("click",openAnswer);
+document.getElementById("settingsOpen").addEventListener("click",()=>openModal("settingsModal"));
+document.getElementById("rulesOpen").addEventListener("click",()=>openModal("rulesModal"));
+document.getElementById("confirmNo").addEventListener("click",()=>closeModal("confirmModal"));
+document.getElementById("confirmYes").addEventListener("click",actuallyNewGame);
+document.getElementById("resultOk").addEventListener("click",()=>{closeModal("resultModal");document.querySelectorAll(".wrong").forEach(x=>x.classList.remove("wrong"))});
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));
+document.querySelectorAll(".difficulty button").forEach(b=>b.addEventListener("click",()=>setDifficulty(b.dataset.level)));
+document.querySelectorAll(".theme").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.theme)));
+document.getElementById("defaultDifficulty").value=difficulty;
+document.getElementById("defaultDifficulty").addEventListener("change",e=>{difficulty=e.target.value;localStorage.setItem("npDifficulty",difficulty)});
+applyTheme(themeName);
+document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));
+actuallyNewGame();
 </script>
-
 </body>
-
 </html>
