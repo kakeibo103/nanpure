@@ -122,6 +122,35 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
 }
 .badge-toast{position:fixed;left:50%;top:12%;transform:translateX(-50%);z-index:1100;width:min(340px,88vw);padding:16px;border-radius:16px;background:#171d20;border:1px solid #d0a43b;color:#ffe18a;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.55);font-weight:900}
 .badge-toast.hidden{display:none}
+
+/* ===== 第6号：プレミアムメダル演出 ===== */
+.badge-panel{background:radial-gradient(circle at 50% 0%,rgba(255,215,100,.16),transparent 28%),radial-gradient(circle at 0% 45%,rgba(70,130,255,.06),transparent 25%),linear-gradient(145deg,#11171b 0%,#05080a 48%,#0d1215 100%)}
+.badge-panel:after{content:"";position:absolute;inset:0;border-radius:18px;pointer-events:none;background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.035) 45%,transparent 55%);opacity:.8}
+.badge-section{border:1px solid rgba(179,137,42,.55);border-radius:12px;padding:8px;background:linear-gradient(180deg,rgba(255,210,80,.025),rgba(0,0,0,.18));box-shadow:inset 0 0 22px rgba(0,0,0,.35)}
+.badge-card{position:relative;overflow:hidden;border-color:#765d26;background:radial-gradient(circle at 50% 28%,rgba(255,220,100,.08),transparent 36%),linear-gradient(150deg,#151c20,#06090b 70%)}
+.badge-card:after{content:"";position:absolute;top:-40%;left:-80%;width:45%;height:180%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transform:rotate(18deg);animation:medalShine 5.5s ease-in-out infinite;pointer-events:none}
+.badge-card.locked:after{display:none}
+@keyframes medalShine{0%,58%{left:-80%;opacity:0}64%{opacity:.8}74%,100%{left:140%;opacity:0}}
+.medal{width:104px;height:112px;margin:5px auto 2px}
+.medal .medal-ribbon{position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:29px;z-index:1;filter:drop-shadow(0 2px 2px #000)}
+.medal .medal-ribbon:before,.medal .medal-ribbon:after{content:"";position:absolute;top:0;width:13px;height:28px}
+.medal .medal-ribbon:before{left:1px;clip-path:polygon(0 0,100% 0,82% 100%,0 82%);background:linear-gradient(90deg,#65140f,#ee5b35,#8e1d14)}
+.medal .medal-ribbon:after{right:1px;clip-path:polygon(0 0,100% 0,100% 82%,18% 100%);background:linear-gradient(90deg,#8e1d14,#ee5b35,#65140f)}
+.medal .laurel{position:absolute;top:28px;left:50%;width:102px;height:70px;transform:translateX(-50%);z-index:0}
+.medal .laurel:before,.medal .laurel:after{content:"";position:absolute;top:7px;width:48px;height:58px;border:5px solid currentColor;border-top-color:transparent;border-right-color:transparent;border-radius:50%;opacity:.9}
+.medal .laurel:before{left:0;transform:rotate(34deg)}.medal .laurel:after{right:0;transform:scaleX(-1) rotate(34deg)}
+.medal .medal-shield{top:19px;width:72px;height:70px;z-index:2;clip-path:polygon(50% 0,88% 11%,100% 42%,82% 80%,50% 100%,18% 80%,0 42%,12% 11%);border:0;box-shadow:0 0 0 2px rgba(255,255,255,.2),0 5px 9px rgba(0,0,0,.55)}
+.medal .medal-inner{width:60px;height:58px;clip-path:polygon(50% 0,88% 11%,100% 42%,82% 80%,50% 100%,18% 80%,0 42%,12% 11%);border:0;position:relative}
+.medal .medal-inner:before{content:"♛";position:absolute;top:2px;right:7px;font-size:12px;line-height:1;color:rgba(255,244,170,.9);text-shadow:0 1px 2px #000}
+.medal .nums{font-family:Georgia,"Times New Roman",serif;font-size:10px!important;letter-spacing:1.4px!important;padding:4px 4px!important;border:1px solid rgba(255,255,255,.5);box-shadow:inset 0 0 5px rgba(255,255,255,.25),0 1px 2px #000}
+.medal .medal-inner small{font-size:7px!important;letter-spacing:1.5px!important;margin-top:2px}
+.medal.bronze{color:#c77b3b}.medal.silver{color:#b8d5e8}.medal.gold{color:#e7b72f}.medal.platinum{color:#9ad8ff}.medal.legend{color:#d38cff}
+.medal.bronze .medal-inner:before{content:"♛";color:#ffd18b}.medal.silver .medal-inner:before{content:"♛";color:#f4fbff}.medal.gold .medal-inner:before{content:"♛";color:#fff0a0}.medal.platinum .medal-inner:before{content:"♛";color:#dff7ff}.medal.legend .medal-inner:before{content:"★";color:#f4c8ff}
+.badge-card:not(.locked) .medal{animation:medalFloat 3.5s ease-in-out infinite}@keyframes medalFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.earned-check{width:24px;height:24px;right:3px;bottom:2px;background:linear-gradient(#b9ff68,#4fae1e);box-shadow:0 0 9px rgba(126,209,61,.55)}
+.special-card .medal{width:84px;height:92px}.special-card .medal .medal-shield{top:16px;width:62px;height:62px}.special-card .medal .medal-inner{width:51px;height:51px}.special-symbol{font-size:25px}
+.badge-time{text-shadow:0 0 8px rgba(155,230,60,.18)}
+
 </style>
 </head>
 <body>
@@ -254,10 +283,23 @@ function getBadges(){try{return JSON.parse(localStorage.getItem("sudokuBadges")|
 function saveBadges(a){localStorage.setItem("sudokuBadges",JSON.stringify(a))}
 function getWinStreak(){return Number(localStorage.getItem("sudokuWinStreak")||0)}
 function setWinStreak(n){localStorage.setItem("sudokuWinStreak",String(n))}
-function badgeMedal(b,earned){if(b.special){return `<div class="medal ${b.style}"><div class="medal-shield"><div class="medal-inner"><span class="special-symbol">${earned?b.special:"🔒"}</span><small>SUDOKU</small></div></div></div>`}return `<div class="medal ${b.style}"><div class="medal-shield"><div class="medal-inner"><div class="nums">${earned?b.icon:"?"}</div><small>SUDOKU</small></div></div>${earned?'<span class="earned-check">✓</span>':""}</div>`}
+function badgeMedal(b,earned){
+  const locked=!earned;
+  const center=b.special?`<span class="special-symbol">${earned?b.special:"?"}</span>`:`<div class="nums">${earned?b.icon:"?"}</div>`;
+  return `<div class="medal ${b.style} ${locked?"locked-medal":""}">
+    <div class="medal-ribbon"></div><div class="laurel"></div>
+    <div class="medal-shield"><div class="medal-inner">${center}<small>SUDOKU</small></div></div>
+    ${earned?'<span class="earned-check">✓</span>':""}
+  </div>`;
+}
 function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
 function guideRow(name,cls,vals){return `<div class="guide-row ${cls}"><strong>${name}</strong>${vals.map(v=>`<span>${v}</span>`).join("")}</div>`}
-function renderTime(){const times=getBadgeStats().best;const groups=[["easy","初級","easy",["10分","7分","5分","3分"]],["normal","中級","normal",["15分","10分","7分","5分"]],["hard","上級","hard",["25分","18分","12分","8分"]]];let cards=[];for(const[,name,diff] of groups){const bs=BADGES.filter(b=>b.diff===diff);cards.push(...bs.map(renderBadgeCard))}return `<div class="badge-section-title">タイムクリアバッジ</div><div class="time-badges">${cards.join("")}</div><div class="badge-section-title">難易度ごとの目安タイム（例）</div><div class="time-guide">${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}</div>`}
+function renderTime(){
+  const groups=[["easy","初級"],["normal","中級"],["hard","上級"]];
+  let blocks=[];
+  for(const[,name,diff]of groups){const bs=BADGES.filter(b=>b.diff===diff);blocks.push(`<div class="badge-section"><div class="badge-section-title">${name} タイムクリア</div><div class="time-badges">${bs.map(renderBadgeCard).join("")}</div></div>`)}
+  return `${blocks.join("")}<div class="badge-section"><div class="badge-section-title">難易度ごとの目安タイム</div><div class="time-guide">${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}</div></div>`;
+}
 function renderSpecial(){const bs=BADGES.filter(b=>b.special);return `<div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div>`}
 function renderAll(){return renderTime()+renderSpecial()+renderStats()}
 function getBadgeStats(){try{return JSON.parse(localStorage.getItem("sudokuBadgeStats")||'{"best":null,"clears":0}')}catch(e){return{best:null,clears:0}}}
