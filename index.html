@@ -225,7 +225,7 @@ mono:{bg:"#eeeeeb",board:"#fafaf8",user:"#cbd5d9",pencil:"#d9d9d9",hint:"#d7b4b4
 let difficulty=localStorage.getItem("npDifficulty")||"normal",themeName=localStorage.getItem("npTheme")||"blue";
 let solution=[],puzzle=[],board=[],types=Array.from({length:9},()=>Array(9).fill(""));
 let pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
-let selectedNumber=null,clearMode=false,pencilMode=false,mistakeCount=0,hintCount=0,answerMode=false,finished=false,seconds=0,timerId=null;
+let selectedNumber=null,clearMode=false,pencilMode=false,mistakeCount=0,hintCount=0,answerMode=false,finished=false,seconds=0,timerId=null,usedPencil=false;
 const sudoku=document.getElementById("sudoku"),msg=document.getElementById("message");
 
 function applyTheme(name){themeName=name;localStorage.setItem("npTheme",name);for(const[k,v]of Object.entries(THEMES[name]))document.documentElement.style.setProperty("--"+k,v);document.querySelectorAll(".theme").forEach(b=>b.classList.toggle("active",b.dataset.theme===name))}
@@ -236,7 +236,7 @@ function countSolutions(g,limit=2){let count=0;function solve(){if(count>=limit)
 function generatePuzzle(){const remove={easy:34,normal:44,hard:50}[difficulty];for(let attempt=0;attempt<10;attempt++){const solved=makeSolution(),p=solved.map(r=>[...r]);let removed=0;for(const[r,c]of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(removed>=remove)break;const old=p[r][c];p[r][c]=0;if(countSolutions(p.map(r=>[...r]))===1)removed++;else p[r][c]=old}if(removed>=remove){solution=solved;puzzle=p;return}}solution=makeSolution();puzzle=solution.map(r=>[...r]);let n=0;for(const[r,c]of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(n++>=remove)break;puzzle[r][c]=0}}
 function resetSelection(){selectedNumber=null;clearMode=false;document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));document.getElementById("clearButton").classList.remove("selected")}
 function render(){sudoku.innerHTML="";for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement("div");cell.className="cell";if(c===2||c===5)cell.classList.add("br");if(r===2||r===5)cell.classList.add("bb");if(puzzle[r][c]){cell.textContent=puzzle[r][c];cell.classList.add("fixed")}else if(board[r][c]){cell.textContent=board[r][c];if(types[r][c])cell.classList.add(types[r][c])}else if(pencilCandidates[r][c].size){const grid=document.createElement("div");grid.className="candidate-grid";for(let n=1;n<=9;n++){const span=document.createElement("span");if(pencilCandidates[r][c].has(n))span.textContent=n;else span.className="empty";grid.appendChild(span)}cell.appendChild(grid);cell.classList.add("pencil")}cell.addEventListener("click",()=>tapCell(r,c,cell));sudoku.appendChild(cell)}}
-function tapCell(r,c,cell){if(puzzle[r][c]||finished||answerMode)return;document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));cell.classList.add("selected");if(clearMode){board[r][c]=0;types[r][c]="";pencilCandidates[r][c].clear();render();return}if(selectedNumber!==null){if(pencilMode){if(board[r][c])return;const set=pencilCandidates[r][c];if(set.has(selectedNumber))set.delete(selectedNumber);else set.add(selectedNumber);render();return}if(board[r][c]===selectedNumber&&types[r][c]==="user"){board[r][c]=0;types[r][c]=""}else{board[r][c]=selectedNumber;types[r][c]="user";pencilCandidates[r][c].clear()}render();checkComplete()}}
+function tapCell(r,c,cell){if(puzzle[r][c]||finished||answerMode)return;document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));cell.classList.add("selected");if(clearMode){board[r][c]=0;types[r][c]="";pencilCandidates[r][c].clear();render();return}if(selectedNumber!==null){if(pencilMode){if(board[r][c])return;usedPencil=true;const set=pencilCandidates[r][c];if(set.has(selectedNumber))set.delete(selectedNumber);else set.add(selectedNumber);render();return}if(board[r][c]===selectedNumber&&types[r][c]==="user"){board[r][c]=0;types[r][c]=""}else{board[r][c]=selectedNumber;types[r][c]="user";pencilCandidates[r][c].clear()}render();checkComplete()}}
 function selectNumber(n){selectedNumber=n;clearMode=false;document.querySelectorAll("[data-number]").forEach(b=>b.classList.toggle("selected",+b.dataset.number===n));document.getElementById("clearButton").classList.remove("selected")}
 function selectClear(){selectedNumber=null;clearMode=true;document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));document.getElementById("clearButton").classList.add("selected")}
 function togglePencil(){pencilMode=!pencilMode;if(!pencilMode)selectedNumber=null;const b=document.getElementById("pencilButton");b.classList.toggle("on",pencilMode);b.textContent=pencilMode?"✏️ 仮置き ON":"✏️ 仮置き OFF"}
@@ -250,7 +250,7 @@ function startTimer(){stopTimer();timerId=setInterval(()=>{if(!finished&&!answer
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
 function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function newGame(){document.getElementById("confirmModal").classList.remove("hidden")}
-function actuallyNewGame(){document.getElementById("confirmModal").classList.add("hidden");finished=false;answerMode=false;hintCount=0;seconds=0;mistakeCount=0;resetSelection();types=Array.from({length:9},()=>Array(9).fill(""));pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));board=[];generatePuzzle();board=puzzle.map(r=>[...r]);document.getElementById("answerButton").classList.add("hidden");document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer()}
+function actuallyNewGame(){document.getElementById("confirmModal").classList.add("hidden");finished=false;answerMode=false;hintCount=0;seconds=0;mistakeCount=0;usedPencil=false;resetSelection();types=Array.from({length:9},()=>Array(9).fill(""));pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));board=[];generatePuzzle();board=puzzle.map(r=>[...r]);document.getElementById("answerButton").classList.add("hidden");document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer()}
 function setDifficulty(level){difficulty=level;localStorage.setItem("npDifficulty",level);document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===level));actuallyNewGame()}
 function openModal(id){document.getElementById(id).classList.remove("hidden")}function closeModal(id){document.getElementById(id).classList.add("hidden")}
 
@@ -263,21 +263,27 @@ document.getElementById("defaultDifficulty").value=difficulty;document.getElemen
 
 /* ===== バッジシステム ===== */
 const BADGES=[
-{id:"easy10",rank:"ブロンズ",limit:10,diff:"easy",icon:"1 2 3",condition:"初級を10分以内でクリア",style:"bronze"},
-{id:"easy7",rank:"シルバー",limit:7,diff:"easy",icon:"4 5 6",condition:"初級を7分以内でクリア",style:"silver"},
-{id:"easy5",rank:"ゴールド",limit:5,diff:"easy",icon:"7 8 9",condition:"初級を5分以内でクリア",style:"gold"},
-{id:"easy3",rank:"プラチナ",limit:3,diff:"easy",icon:"1 2 3",condition:"初級を3分以内でクリア",style:"platinum"},
-{id:"normal15",rank:"ブロンズ",limit:15,diff:"normal",icon:"1 2 3",condition:"中級を15分以内でクリア",style:"bronze"},
-{id:"normal10",rank:"シルバー",limit:10,diff:"normal",icon:"4 5 6",condition:"中級を10分以内でクリア",style:"silver"},
-{id:"normal7",rank:"ゴールド",limit:7,diff:"normal",icon:"7 8 9",condition:"中級を7分以内でクリア",style:"gold"},
-{id:"normal5",rank:"プラチナ",limit:5,diff:"normal",icon:"1 2 3",condition:"中級を5分以内でクリア",style:"platinum"},
-{id:"hard25",rank:"ブロンズ",limit:25,diff:"hard",icon:"1 2 3",condition:"上級を25分以内でクリア",style:"bronze"},
-{id:"hard18",rank:"シルバー",limit:18,diff:"hard",icon:"4 5 6",condition:"上級を18分以内でクリア",style:"silver"},
-{id:"hard12",rank:"ゴールド",limit:12,diff:"hard",icon:"7 8 9",condition:"上級を12分以内でクリア",style:"gold"},
-{id:"hard8",rank:"プラチナ",limit:8,diff:"hard",icon:"1 2 3",condition:"上級を8分以内でクリア",style:"platinum"},
-{id:"perfect",rank:"パーフェクト",condition:"ミス0回・ヒント0回でクリア",style:"gold",special:"🎯"},
-{id:"speed",rank:"スピードスター",condition:"5分以内にクリア",style:"platinum",special:"⚡"},
-{id:"streak3",rank:"3連勝",condition:"3問連続でクリア",style:"gold",special:"🔥"}
+  {id:"easy10",rank:"ブロンズ",limit:10,diff:"easy",icon:"1 2 3",condition:"初級を10分以内でクリア",style:"bronze"},
+  {id:"easy7",rank:"シルバー",limit:7,diff:"easy",icon:"4 5 6",condition:"初級を7分以内でクリア",style:"silver"},
+  {id:"easy5",rank:"ゴールド",limit:5,diff:"easy",icon:"7 8 9",condition:"初級を5分以内でクリア",style:"gold"},
+  {id:"easy3",rank:"プラチナ",limit:3,diff:"easy",icon:"1 2 3",condition:"初級を3分以内でクリア",style:"platinum"},
+
+  {id:"normal15",rank:"ブロンズ",limit:15,diff:"normal",icon:"1 2 3",condition:"中級を15分以内でクリア",style:"bronze"},
+  {id:"normal10",rank:"シルバー",limit:10,diff:"normal",icon:"4 5 6",condition:"中級を10分以内でクリア",style:"silver"},
+  {id:"normal7",rank:"ゴールド",limit:7,diff:"normal",icon:"7 8 9",condition:"中級を7分以内でクリア",style:"gold"},
+  {id:"normal5",rank:"プラチナ",limit:5,diff:"normal",icon:"1 2 3",condition:"中級を5分以内でクリア",style:"platinum"},
+
+  {id:"hard25",rank:"ブロンズ",limit:25,diff:"hard",icon:"1 2 3",condition:"上級を25分以内でクリア",style:"bronze"},
+  {id:"hard18",rank:"シルバー",limit:18,diff:"hard",icon:"4 5 6",condition:"上級を18分以内でクリア",style:"silver"},
+  {id:"hard12",rank:"ゴールド",limit:12,diff:"hard",icon:"7 8 9",condition:"上級を12分以内でクリア",style:"gold"},
+  {id:"hard8",rank:"プラチナ",limit:8,diff:"hard",icon:"1 2 3",condition:"上級を8分以内でクリア",style:"platinum"},
+
+  {id:"speed",rank:"スピードスター",condition:"5分以内にクリア",style:"platinum",special:"⚡"},
+  {id:"perfect",rank:"パーフェクト",condition:"ミス0回・ヒント0回でクリア",style:"gold",special:"🎯"},
+  {id:"nohint",rank:"ノーヒント",condition:"ヒントを使わずにクリア",style:"bronze",special:"💡"},
+  {id:"pencilmaster",rank:"仮置きマスター",condition:"仮置きを使ってクリア",style:"legend",special:"✏️"},
+  {id:"streak3",rank:"連勝クリア",condition:"3問連続でクリア",style:"gold",special:"🔥"},
+  {id:"complete",rank:"完全制覇",condition:"全難易度でゴールド獲得",style:"platinum",special:"♛"}
 ];
 function getBadges(){try{return JSON.parse(localStorage.getItem("sudokuBadges")||"[]")}catch(e){return[]}}
 function saveBadges(a){localStorage.setItem("sudokuBadges",JSON.stringify(a))}
@@ -292,13 +298,19 @@ function badgeMedal(b,earned){
     ${earned?'<span class="earned-check">✓</span>':""}
   </div>`;
 }
-function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
+function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${b.special?"special-card ":""}${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
 function guideRow(name,cls,vals){return `<div class="guide-row ${cls}"><strong>${name}</strong>${vals.map(v=>`<span>${v}</span>`).join("")}</div>`}
 function renderTime(){
-  const groups=[["easy","初級"],["normal","中級"],["hard","上級"]];
-  let blocks=[];
-  for(const[,name,diff]of groups){const bs=BADGES.filter(b=>b.diff===diff);blocks.push(`<div class="badge-section"><div class="badge-section-title">${name} タイムクリア</div><div class="time-badges">${bs.map(renderBadgeCard).join("")}</div></div>`)}
-  return `${blocks.join("")}<div class="badge-section"><div class="badge-section-title">難易度ごとの目安タイム</div><div class="time-guide">${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}</div></div>`;
+  const bs=BADGES.filter(b=>b.diff);
+  const cards=bs.map(renderBadgeCard).join("");
+  return `<div class="badge-section-title">タイムクリアバッジ</div>
+    <div class="time-badges">${cards}</div>
+    <div class="badge-section-title">難易度ごとの目安タイム（例）</div>
+    <div class="time-guide">
+      ${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}
+      ${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}
+      ${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}
+    </div>`;
 }
 function renderSpecial(){const bs=BADGES.filter(b=>b.special);return `<div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div>`}
 function renderAll(){return renderTime()+renderSpecial()+renderStats()}
