@@ -6,57 +6,122 @@
 <title>ナンプレ</title>
 <style>
 :root{
-  --bg:#f5eedf;--board:#fffaf0;--text:#40515a;--line:#88aaba;--user:#b9ddec;
-  --pencil:#d9c4ef;--hint:#efb0b0;--answer:#f1db91;--accent:#4e9bc1;
-  --soft:#d9eaf0;--success:#a9d9b9;--danger:#e9a2a2;--modal:#fffdf7
+  --bg:#f5eedf;--board:#fffaf0;--text:#40515a;--line:#88aaba;
+  --user:#b9ddec;--pencil:#d9c4ef;--hint:#efb0b0;--answer:#f1db91;
+  --accent:#4e9bc1;--soft:#d9eaf0;--success:#a9d9b9;--danger:#e9a2a2;
+  --modal:#fffdf7;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
 body{min-height:100vh;display:flex;justify-content:center}
 button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;color:var(--text)}
 .app{width:min(100%,560px);padding:8px 10px 14px}
-.header{position:relative;text-align:center;margin-bottom:7px}.title-main{font-size:26px;font-weight:800;letter-spacing:3px;line-height:1.05}.title-sub{font-size:13px;opacity:.65;margin-top:3px}
-.top-btn{position:absolute;top:0;width:48px;height:42px;border-radius:14px;background:rgba(255,255,255,.58);box-shadow:0 2px 7px rgba(0,0,0,.08);font-size:22px}#settingsOpen{left:0}#rulesOpen{right:0}
-.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px}.difficulty button{min-height:34px;border-radius:9px;background:#d8e8ed;font-weight:700}.difficulty button.active{background:var(--accent);color:#fff}
+.header{position:relative;text-align:center;margin-bottom:7px}
+.title-main{font-size:26px;font-weight:800;letter-spacing:3px;line-height:1.05}
+.title-sub{font-size:13px;opacity:.65;margin-top:3px}
+.top-btn{position:absolute;top:0;width:48px;height:42px;border-radius:14px;background:rgba(255,255,255,.58);box-shadow:0 2px 7px rgba(0,0,0,.08);font-size:22px}
+#settingsOpen{left:0}#rulesOpen{right:0}
+.difficulty{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px}
+.difficulty button{min-height:34px;border-radius:9px;background:#d8e8ed;font-weight:700}
+.difficulty button.active{background:var(--accent);color:#fff}
 .sudoku{width:100%;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));background:var(--board);border:3px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 9px rgba(0,0,0,.08)}
-.cell{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,6vw,34px);font-weight:650;border-right:1px solid #c8d6da;border-bottom:1px solid #c8d6da;user-select:none;cursor:pointer;position:relative}.cell.br{border-right:3px solid var(--line)}.cell.bb{border-bottom:3px solid var(--line)}.cell.fixed{background:var(--board);cursor:default}.cell.user{background:var(--user)}.cell.pencil{background:var(--pencil)}.cell.hint{background:var(--hint);color:#7b3030}.cell.answer{background:var(--answer);color:#665415}.cell.selected{outline:3px solid var(--accent);outline-offset:-3px}.cell.wrong{box-shadow:inset 0 0 0 3px #d95353;background:#f2b4b4}
-.number-panel{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}.number-panel button{min-height:40px;border-radius:9px;background:var(--user);font-size:18px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.08)}.number-panel button.selected{background:var(--accent);color:#fff}#clearButton{background:#9fc8dc;color:#fff}
-.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.action-grid button{min-height:44px;border-radius:10px;font-weight:750}#hintButton{background:var(--hint)}#pencilButton{background:var(--pencil)}#pencilButton.on{box-shadow:inset 0 0 0 3px #8e5fb8}#newGameButton{grid-column:1/-1;background:#c9e6d0;font-size:16px}
-.status{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:nowrap;margin-top:5px;margin-bottom:0;font-size:12px;opacity:.8}#answerButton{width:100%;margin-top:6px;min-height:40px;border-radius:10px;background:var(--answer);font-weight:750}.hidden{display:none!important}.message{min-height:19px;text-align:center;font-size:13px;font-weight:700;margin-top:4px}.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:11px;opacity:.8}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:3px}.dot.user{background:var(--user)}.dot.pencil{background:var(--pencil)}.dot.hint{background:var(--hint)}.dot.answer{background:var(--answer)}
-.overlay{position:fixed;inset:0;background:rgba(55,65,70,.35);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.modal{width:min(100%,500px);max-height:90vh;overflow:auto;background:var(--modal);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-head h2{margin:0;font-size:23px}.close{width:38px;height:38px;border-radius:10px;background:#e5edf0;font-size:23px}.setting-section{background:#f7f1e6;border-radius:13px;padding:12px;margin-top:10px}.setting-section h3{margin:0 0 9px;font-size:16px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0}.setting-row select{padding:8px;border:1px solid #cbd7da;border-radius:8px;background:#fff}.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.theme{min-height:55px;border:2px solid transparent;border-radius:10px;background:#fff;text-align:left;padding:8px}.theme.active{border-color:var(--accent)}.swatches{display:flex;gap:4px;margin-bottom:4px}.swatch{width:20px;height:20px;border-radius:50%}.rule-list{margin:0;padding-left:22px;line-height:1.75}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions button{flex:1;min-height:42px;border-radius:10px;background:var(--user);font-weight:700}.result-icon{font-size:48px;text-align:center;margin-top:2px}.result-title{text-align:center;font-size:25px;font-weight:800}.result-text{text-align:center;margin:8px 0 14px;line-height:1.6}.result-ok{background:var(--success)!important}.result-ng{background:var(--danger)!important}.confirm-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.confirm-buttons button{min-height:44px;border-radius:10px;font-weight:750}#confirmNo{background:#e5ebed}#confirmYes{background:var(--accent);color:#fff}
-.candidate-grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center;font-size:clamp(8px,2.2vw,13px);line-height:1;color:#4f7482;font-weight:700;pointer-events:none}.candidate-grid span{display:flex;align-items:center;justify-content:center;width:100%;height:100%}.candidate-grid span.empty{visibility:hidden}
-
-/* ===== ゴージャス・メダル風バッジ ===== */
-.badge-modal{position:fixed;inset:0;background:rgba(12,16,20,.72);display:flex;align-items:center;justify-content:center;z-index:1000;padding:12px;backdrop-filter:blur(3px)}
+.cell{width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,6vw,34px);font-weight:650;border-right:1px solid #c8d6da;border-bottom:1px solid #c8d6da;user-select:none;cursor:pointer;position:relative}
+.cell.br{border-right:3px solid var(--line)}.cell.bb{border-bottom:3px solid var(--line)}
+.cell.fixed{background:var(--board);cursor:default}.cell.user{background:var(--user)}.cell.pencil{background:var(--pencil)}
+.cell.hint{background:var(--hint);color:#7b3030}.cell.answer{background:var(--answer);color:#665415}
+.cell.selected{outline:3px solid var(--accent);outline-offset:-3px}.cell.wrong{box-shadow:inset 0 0 0 3px #d95353;background:#f2b4b4}
+.number-panel{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.number-panel button{min-height:40px;border-radius:9px;background:var(--user);font-size:18px;font-weight:700;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.number-panel button.selected{background:var(--accent);color:#fff}#clearButton{background:#9fc8dc;color:#fff}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.action-grid button{min-height:44px;border-radius:10px;font-weight:750}
+#hintButton{background:var(--hint)}#pencilButton{background:var(--pencil)}#pencilButton.on{box-shadow:inset 0 0 0 3px #8e5fb8}
+#newGameButton{grid-column:1/-1;background:#c9e6d0;font-size:16px}
+.status{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:nowrap;margin-top:5px;font-size:12px;opacity:.8}
+#answerButton{width:100%;margin-top:6px;min-height:40px;border-radius:10px;background:var(--answer);font-weight:750}
+.hidden{display:none!important}.message{min-height:19px;text-align:center;font-size:13px;font-weight:700;margin-top:4px}
+.legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:11px;opacity:.8}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:3px}
+.dot.user{background:var(--user)}.dot.pencil{background:var(--pencil)}.dot.hint{background:var(--hint)}.dot.answer{background:var(--answer)}
+.overlay{position:fixed;inset:0;background:rgba(55,65,70,.35);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal{width:min(100%,500px);max-height:90vh;overflow:auto;background:var(--modal);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.modal-head h2{margin:0;font-size:23px}
+.close{width:38px;height:38px;border-radius:10px;background:#e5edf0;font-size:23px}
+.setting-section{background:#f7f1e6;border-radius:13px;padding:12px;margin-top:10px}.setting-section h3{margin:0 0 9px;font-size:16px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0}.setting-row select{padding:8px;border:1px solid #cbd7da;border-radius:8px;background:#fff}
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.theme{min-height:55px;border:2px solid transparent;border-radius:10px;background:#fff;text-align:left;padding:8px}.theme.active{border-color:var(--accent)}
+.swatches{display:flex;gap:4px;margin-bottom:4px}.swatch{width:20px;height:20px;border-radius:50%}
+.rule-list{margin:0;padding-left:22px;line-height:1.75}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions button{flex:1;min-height:42px;border-radius:10px;background:var(--user);font-weight:700}
+.result-icon{font-size:48px;text-align:center;margin-top:2px}.result-title{text-align:center;font-size:25px;font-weight:800}.result-text{text-align:center;margin:8px 0 14px;line-height:1.6}
+.result-ok{background:var(--success)!important}.result-ng{background:var(--danger)!important}
+.confirm-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.confirm-buttons button{min-height:44px;border-radius:10px;font-weight:750}
+#confirmNo{background:#e5ebed}#confirmYes{background:var(--accent);color:#fff}
+.candidate-grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center;font-size:clamp(8px,2.2vw,13px);line-height:1;color:#4f7482;font-weight:700;pointer-events:none}
+.candidate-grid span{display:flex;align-items:center;justify-content:center;width:100%;height:100%}.candidate-grid span.empty{visibility:hidden}
+.badge-open{width:100%;margin-top:5px;min-height:34px;border-radius:10px;background:#e8dfc9;color:#4d5b50;font-weight:700}
+.badge-modal{position:fixed;inset:0;background:rgba(2,7,10,.78);display:flex;align-items:center;justify-content:center;z-index:1000;padding:10px}
 .badge-modal.hidden{display:none}
-.badge-panel{width:min(500px,96vw);max-height:90vh;overflow:auto;background:linear-gradient(145deg,#17191d,#25282d 45%,#111317);border:2px solid #8e7130;border-radius:18px;padding:14px;box-shadow:0 16px 50px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,225,130,.25);color:#f3ead0}
-.badge-panel::-webkit-scrollbar{width:7px}.badge-panel::-webkit-scrollbar-thumb{background:#77602e;border-radius:10px}
-.badge-title{margin:0;text-align:center;font-size:20px;letter-spacing:1px;color:#f5d875;text-shadow:0 1px 4px #000}.badge-subtitle{text-align:center;font-size:10px;color:#aaa;margin:3px 0 12px}
-.badge-section{border:1px solid #4d4f51;border-radius:10px;padding:9px;margin-top:9px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(0,0,0,.18))}
-.badge-section-title{text-align:center;color:#e4c665;font-size:11px;font-weight:800;margin-bottom:7px;letter-spacing:.7px}
-.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.badge-card{min-width:0;text-align:center;padding:4px 2px;border-radius:8px;transition:.15s}.badge-card:hover{background:rgba(255,215,100,.07)}
-.medal{width:72px;height:72px;margin:0 auto 3px;position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 5px rgba(0,0,0,.5))}
-.medal::before{content:"";position:absolute;inset:9px;border-radius:50%;background:linear-gradient(145deg,#fff6b0,#b47a12 45%,#ffe78a 60%,#7d4b09);box-shadow:inset 0 0 0 3px #f9df75,inset 0 0 0 6px #744608,0 1px 2px #000}
-.medal::after{content:"";position:absolute;inset:15px;border-radius:50%;border:1px solid rgba(255,255,255,.65);box-shadow:inset 0 0 8px rgba(0,0,0,.6)}
-.medal.silver::before{background:linear-gradient(145deg,#fff,#7f8992 45%,#eef3f5 60%,#3d454c);box-shadow:inset 0 0 0 3px #e6edf0,inset 0 0 0 6px #505a62,0 1px 2px #000}
-.medal.bronze::before{background:linear-gradient(145deg,#ffd9a0,#8e4317 45%,#e8a25a 60%,#55220b);box-shadow:inset 0 0 0 3px #e9a66a,inset 0 0 0 6px #64270d,0 1px 2px #000}
-.medal.platinum::before{background:linear-gradient(145deg,#ffffff,#77a5c8 38%,#e7f8ff 58%,#385f86);box-shadow:inset 0 0 0 3px #d8f5ff,inset 0 0 0 6px #41627e,0 1px 2px #000}
-.medal.locked::before{background:linear-gradient(145deg,#6c7072,#292c2f);box-shadow:inset 0 0 0 3px #777b7d,inset 0 0 0 6px #222;filter:grayscale(1)}
-.medal-icon{position:relative;z-index:2;font-size:25px;text-shadow:0 2px 2px #000}
-.medal.locked .medal-icon{opacity:.55;font-size:24px}
-.medal-ribbon{position:absolute;top:0;width:22px;height:25px;background:linear-gradient(90deg,#7b0e0e,#e63c2f 45%,#6d0b0b);clip-path:polygon(0 0,100% 0,88% 100%,50% 78%,12% 100%);z-index:0;box-shadow:0 1px 2px #000}
-.medal-ribbon.blue{background:linear-gradient(90deg,#102c54,#5d9dcc 45%,#10233e)}.medal-ribbon.purple{background:linear-gradient(90deg,#32104d,#9c55c9 45%,#251038)}
-.medal-name{font-size:10px;font-weight:800;color:#eee8d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge-card.locked .medal-name{color:#85898d}
-.badge-card .condition{font-size:8px;color:#aaa;line-height:1.2;margin-top:2px}
-.badge-card.earned .condition{color:#d8c47d}
-.badge-detail{font-size:8px;color:#777;margin-top:1px}
-.badge-close{width:100%;margin-top:10px;min-height:38px;border:1px solid #846b2d;border-radius:10px;background:linear-gradient(#4b4d4e,#292b2d);color:#f2df99;font-weight:800}
-.badge-close:active{transform:translateY(1px)}
-.badge-toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:1100;width:min(360px,88vw);padding:16px;border-radius:16px;border:1px solid #b88a27;background:linear-gradient(145deg,#2c2410,#4a3510);color:#ffe69a;text-align:center;box-shadow:0 10px 35px rgba(0,0,0,.55);font-weight:800}
+.badge-panel{
+  width:min(760px,96vw);max-height:92vh;overflow:auto;position:relative;
+  color:#eee;background:
+    radial-gradient(circle at 50% -20%,rgba(255,215,80,.12),transparent 38%),
+    linear-gradient(145deg,#11161a,#05090b 55%,#101417);
+  border:1px solid #8f6b20;border-radius:18px;padding:14px;
+  box-shadow:0 0 0 1px rgba(255,205,70,.12),0 18px 60px rgba(0,0,0,.65),inset 0 0 40px rgba(0,0,0,.5);
+}
+.badge-panel:before{content:"";position:absolute;inset:5px;border:1px solid rgba(207,159,43,.35);border-radius:14px;pointer-events:none}
+.badge-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 10px;position:relative;z-index:1}
+.badge-title{font-size:clamp(20px,5vw,30px);font-weight:900;letter-spacing:2px;color:#f2d77b;text-shadow:0 1px 10px rgba(255,203,64,.25)}
+.badge-close-x{width:36px;height:36px;border-radius:9px;background:#151c20;border:1px solid #8f6b20;color:#f5d477;font-size:22px}
+.badge-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px;position:relative;z-index:1}
+.badge-tab{min-height:36px;border:1px solid #55451f;border-radius:8px;background:#0c1215;color:#bbb;font-weight:800}
+.badge-tab.active{background:linear-gradient(#6c4c0c,#2e2208);color:#ffe28a;border-color:#c79a35;box-shadow:0 0 12px rgba(219,170,55,.15)}
+.badge-section-title{text-align:center;color:#e8c65b;font-weight:900;font-size:17px;margin:10px 0 7px;letter-spacing:1px}
+.badge-section-title:before,.badge-section-title:after{content:"✦";margin:0 10px;color:#d9aa37}
+.time-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.badge-card{background:linear-gradient(145deg,#11181b,#080c0e);border:1px solid #5c491f;border-radius:10px;padding:7px 5px;text-align:center;min-width:0;box-shadow:inset 0 0 16px rgba(0,0,0,.55)}
+.badge-card.locked{filter:saturate(.18);opacity:.62}.badge-card .rank{font-size:12px;font-weight:900}.badge-card .condition{font-size:10px;color:#ddd;margin-top:2px}
+.medal{
+  width:86px;height:96px;margin:4px auto 3px;position:relative;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.55));
+}
+.medal:before{content:"";position:absolute;top:0;width:27px;height:23px;border-radius:4px 4px 8px 8px;background:linear-gradient(90deg,#631a12,#f06b36 50%,#741a13);box-shadow:0 2px 3px #000}
+.medal-shield{position:absolute;top:16px;width:70px;height:67px;clip-path:polygon(50% 0,92% 16%,92% 62%,50% 100%,8% 62%,8% 16%);display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#fff,#777 30%,#222 58%,#eee 82%,#555);box-shadow:0 0 0 3px #222}
+.medal-inner{width:58px;height:55px;clip-path:polygon(50% 0,92% 16%,92% 62%,50% 100%,8% 62%,8% 16%);background:linear-gradient(145deg,#eee,#999 42%,#333 65%,#ddd);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#111;font-weight:900}
+.medal-inner .nums{font-size:10px;line-height:1.2;letter-spacing:2px;background:rgba(255,255,255,.65);padding:3px;border-radius:3px}.medal-inner small{font-size:8px;letter-spacing:1px}
+.medal.bronze .medal-shield{background:linear-gradient(145deg,#fff2cf,#8d4b1c 28%,#2b1208 55%,#e8a65a 80%,#6d2d0d)}.medal.bronze .medal-inner{background:linear-gradient(145deg,#ffd99c,#8d4b1c 60%,#4d1d08);color:#241207}
+.medal.silver .medal-shield{background:linear-gradient(145deg,#fff,#8b949b 32%,#222 55%,#f4f7f8 80%,#5b646a)}.medal.silver .medal-inner{background:linear-gradient(145deg,#fff,#8f999f 55%,#42484d);color:#111}
+.medal.gold .medal-shield{background:linear-gradient(145deg,#fff2a8,#b87800 28%,#4a2600 55%,#ffd94f 80%,#8a4f00)}.medal.gold .medal-inner{background:linear-gradient(145deg,#fff1a1,#d18b00 55%,#7c4100);color:#271600}
+.medal.platinum .medal-shield{background:linear-gradient(145deg,#fff,#74bce7 25%,#273f5a 55%,#dff6ff 80%,#5f91b5)}.medal.platinum .medal-inner{background:linear-gradient(145deg,#dff8ff,#77a8c5 55%,#34566f);color:#10202b}
+.medal.legend .medal-shield{background:linear-gradient(145deg,#fff0a2,#7d42d8 27%,#1d0c38 55%,#f0a8ff 80%,#5e239f)}.medal.legend .medal-inner{background:linear-gradient(145deg,#f4d6ff,#7039a5 55%,#28103d);color:#fff}
+.earned-check{position:absolute;right:4px;bottom:4px;width:21px;height:21px;border-radius:50%;background:#7ed13d;color:#071108;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0a130a}
+.badge-time{font-size:11px;color:#9be63c;font-weight:900;min-height:17px}
+.badge-time.lock{color:#aaa}
+.time-guide{margin-top:9px;border:1px solid #55451f;border-radius:9px;padding:7px;background:rgba(0,0,0,.25)}
+.guide-row{display:grid;grid-template-columns:42px repeat(5,1fr);gap:4px;font-size:9px;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center}.guide-row:last-child{border-bottom:0}
+.guide-row strong{font-size:10px}.guide-row.easy strong{color:#8edb3c}.guide-row.normal strong{color:#ffb52e}.guide-row.hard strong{color:#ff5c52}
+.special-badges{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.special-card .medal{width:70px;height:78px}.special-card .medal:before{height:19px;width:23px}.special-card .medal-shield{top:13px;width:58px;height:57px}.special-card .medal-inner{width:48px;height:46px}
+.special-symbol{font-size:22px;text-shadow:0 2px 3px #000}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px;border:1px solid #55451f;border-radius:9px;padding:7px;background:#090e10}
+.stat{text-align:center;border-right:1px solid #3b321d}.stat:last-child{border-right:0}.stat-label{font-size:9px;color:#bbb}.stat-value{font-size:16px;color:#f0d05c;font-weight:900;margin-top:2px}
+.badge-footer{display:flex;justify-content:center;margin-top:10px}.badge-footer button{min-width:140px;min-height:38px;border-radius:9px;background:linear-gradient(#342b18,#15120c);border:1px solid #9e7624;color:#f5d57a;font-weight:900}
+@media(max-width:600px){
+  .badge-modal{padding:7px}.badge-panel{width:100%;max-height:94vh;padding:10px;border-radius:15px}
+  .time-badges{grid-template-columns:repeat(4,1fr);gap:4px}.badge-card{padding:5px 2px}.medal{width:64px;height:76px}.medal:before{width:21px;height:19px}.medal-shield{top:13px;width:54px;height:55px}.medal-inner{width:45px;height:44px}.medal-inner .nums{font-size:8px}.medal-inner small{font-size:6px}.badge-card .rank{font-size:10px}.badge-card .condition{font-size:8px}.badge-time{font-size:9px}
+  .special-badges{grid-template-columns:repeat(3,1fr);gap:5px}.special-card .medal{width:60px;height:70px}.special-card .medal-shield{width:51px;height:51px}.special-card .medal-inner{width:43px;height:41px}
+  .stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid #3b321d;padding-bottom:4px}
+  .guide-row{font-size:8px;grid-template-columns:34px repeat(5,1fr)}.guide-row strong{font-size:9px}
+}
+@media(max-width:380px){
+  .time-badges{grid-template-columns:repeat(2,1fr)}.special-badges{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-height:760px){
+  .app{padding-top:4px}.header{margin-bottom:4px}.title-main{font-size:23px}.title-sub{font-size:12px}.difficulty{margin-bottom:5px}.difficulty button{min-height:30px}
+  .number-panel{margin-top:5px;gap:5px}.number-panel button{min-height:37px}.action-grid{margin-top:5px}.action-grid button{min-height:39px}.status{margin-top:3px}.legend{display:none}
+}
+.badge-toast{position:fixed;left:50%;top:12%;transform:translateX(-50%);z-index:1100;width:min(340px,88vw);padding:16px;border-radius:16px;background:#171d20;border:1px solid #d0a43b;color:#ffe18a;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.55);font-weight:900}
 .badge-toast.hidden{display:none}
-@media(max-width:430px){.badge-panel{padding:10px}.badge-grid{gap:4px}.medal{width:65px;height:65px}.medal-icon{font-size:22px}.badge-title{font-size:18px}.badge-section{padding:7px}}
-@media(max-height:760px){.app{padding-top:4px}.header{margin-bottom:4px}.title-main{font-size:23px}.title-sub{font-size:12px}.difficulty{margin-bottom:5px}.difficulty button{min-height:30px}.number-panel{margin-top:5px;gap:5px}.number-panel button{min-height:37px}.action-grid{margin-top:5px}.action-grid button{min-height:39px}.status{margin-top:3px}.legend{display:none}}
 </style>
 </head>
 <body>
@@ -66,53 +131,80 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
     <div class="title-main">🧩 ナンプレ</div><div class="title-sub">Sudoku</div>
     <button class="top-btn" id="rulesOpen" aria-label="ルール">?</button>
   </div>
-  <div class="difficulty"><button data-level="easy">初級</button><button data-level="normal" class="active">中級</button><button data-level="hard">上級</button></div>
+  <div class="difficulty">
+    <button data-level="easy">初級</button><button data-level="normal" class="active">中級</button><button data-level="hard">上級</button>
+  </div>
   <div id="sudoku" class="sudoku"></div>
   <div class="number-panel">
     <button data-number="1">1</button><button data-number="2">2</button><button data-number="3">3</button><button data-number="4">4</button><button data-number="5">5</button>
     <button data-number="6">6</button><button data-number="7">7</button><button data-number="8">8</button><button data-number="9">9</button><button id="clearButton">消す</button>
   </div>
   <div class="status"><span>⏱ 経過時間 <strong id="timer">00:00</strong></span><span>💡 ヒント <strong id="hintCount">0</strong>/5</span></div>
-  <div class="action-grid"><button id="hintButton">💡 ヒント <span id="hintRemain">残り5回</span></button><button id="pencilButton">✏️ 仮置き OFF</button><button id="newGameButton">🔄 新しい問題</button></div>
-  <button id="badgeOpen" class="badge-open" style="width:100%;margin-top:5px;min-height:34px;border-radius:10px;background:#e8dfc9;font-weight:700">🏆 バッジコレクション</button>
-  <button id="answerButton" class="hidden">答え合わせ</button><div id="message" class="message"></div>
+  <div class="action-grid">
+    <button id="hintButton">💡 ヒント <span id="hintRemain">残り5回</span></button><button id="pencilButton">✏️ 仮置き OFF</button>
+    <button id="newGameButton">🔄 新しい問題</button>
+  </div>
+  <button id="badgeOpen" class="badge-open">🏆 バッジコレクション</button>
+  <button id="answerButton" class="hidden">答え合わせ</button>
+  <div id="message" class="message"></div>
   <div class="legend"><span><i class="dot user"></i>自分の入力</span><span><i class="dot pencil"></i>仮置き</span><span><i class="dot hint"></i>ヒント</span><span><i class="dot answer"></i>答え</span></div>
 </div>
 
 <div id="settingsModal" class="overlay hidden"><div class="modal">
-<div class="modal-head"><h2>⚙️ 設定</h2><button class="close" data-close="settingsModal">×</button></div>
-<div class="setting-section"><h3>🎮 ゲーム設定</h3><div class="setting-row"><span>ヒント回数</span><select id="hintSetting"><option value="5">5回</option></select></div><div class="setting-row"><span>起動時の難易度</span><select id="defaultDifficulty"><option value="easy">初級</option><option value="normal">中級</option><option value="hard">上級</option></select></div></div>
-<div class="setting-section"><h3>🎨 色のテーマ</h3><div class="theme-grid"><button class="theme active" data-theme="blue"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9ddec"></i></div>ベージュ × ブルー</button><button class="theme" data-theme="green"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9dfc3"></i></div>ベージュ × グリーン</button><button class="theme" data-theme="purple"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#d9c4ef"></i></div>ベージュ × パープル</button><button class="theme" data-theme="mono"><div class="swatches"><i class="swatch" style="background:#eee"></i><i class="swatch" style="background:#c6d0d4"></i></div>モノトーン</button></div></div>
-<div class="setting-section"><h3>📖 ルール説明</h3><ol class="rule-list"><li>1〜9の数字を使います。</li><li>縦の列に同じ数字を入れません。</li><li>横の行に同じ数字を入れません。</li><li>太線で囲まれた3×3ブロックにも同じ数字を入れません。</li><li>すべての空欄を正しく埋めたらクリアです。</li></ol></div><div class="modal-actions"><button data-close="settingsModal">閉じる</button></div>
+  <div class="modal-head"><h2>⚙️ 設定</h2><button class="close" data-close="settingsModal">×</button></div>
+  <div class="setting-section"><h3>🎮 ゲーム設定</h3>
+    <div class="setting-row"><span>ヒント回数</span><select id="hintSetting"><option value="5">5回</option></select></div>
+    <div class="setting-row"><span>起動時の難易度</span><select id="defaultDifficulty"><option value="easy">初級</option><option value="normal">中級</option><option value="hard">上級</option></select></div>
+  </div>
+  <div class="setting-section"><h3>🎨 色のテーマ</h3><div class="theme-grid">
+    <button class="theme active" data-theme="blue"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9ddec"></i></div>ベージュ × ブルー</button>
+    <button class="theme" data-theme="green"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#b9dfc3"></i></div>ベージュ × グリーン</button>
+    <button class="theme" data-theme="purple"><div class="swatches"><i class="swatch" style="background:#f5eedf"></i><i class="swatch" style="background:#d9c4ef"></i></div>ベージュ × パープル</button>
+    <button class="theme" data-theme="mono"><div class="swatches"><i class="swatch" style="background:#eee"></i><i class="swatch" style="background:#c6d0d4"></i></div>モノトーン</button>
+  </div></div>
+  <div class="setting-section"><h3>📖 ルール説明</h3><ol class="rule-list"><li>1〜9の数字を使います。</li><li>縦の列に同じ数字を入れません。</li><li>横の行に同じ数字を入れません。</li><li>3×3ブロックにも同じ数字を入れません。</li><li>すべての空欄を正しく埋めたらクリアです。</li></ol></div>
+  <div class="modal-actions"><button data-close="settingsModal">閉じる</button></div>
 </div></div>
-<div id="rulesModal" class="overlay hidden"><div class="modal"><div class="modal-head"><h2>📖 ナンプレのルール</h2><button class="close" data-close="rulesModal">×</button></div><div class="setting-section"><ol class="rule-list"><li>空欄に1〜9の数字を入れます。</li><li>同じ横一列に同じ数字は入りません。</li><li>同じ縦一列に同じ数字は入りません。</li><li>3×3のブロックにも同じ数字は入りません。</li><li>すべて正しく埋めるとクリアです。</li></ol></div><div class="modal-actions"><button data-close="rulesModal">閉じる</button></div></div></div>
+
+<div id="rulesModal" class="overlay hidden"><div class="modal">
+  <div class="modal-head"><h2>📖 ナンプレのルール</h2><button class="close" data-close="rulesModal">×</button></div>
+  <div class="setting-section"><ol class="rule-list"><li>空欄に1〜9の数字を入れます。</li><li>同じ横一列に同じ数字は入りません。</li><li>同じ縦一列に同じ数字は入りません。</li><li>3×3のブロックにも同じ数字は入りません。</li><li>すべて正しく埋めるとクリアです。</li></ol></div>
+  <div class="modal-actions"><button data-close="rulesModal">閉じる</button></div>
+</div></div>
+
 <div id="confirmModal" class="overlay hidden"><div class="modal"><div class="result-icon">🔄</div><div class="result-title">新しい問題</div><div class="result-text">現在の問題を終了して、<br>新しい問題に進みますか？</div><div class="confirm-buttons"><button id="confirmNo">いいえ</button><button id="confirmYes">はい</button></div></div></div>
 <div id="resultModal" class="overlay hidden"><div class="modal"><div id="resultIcon" class="result-icon">🎉</div><div id="resultTitle" class="result-title">正解！</div><div id="resultText" class="result-text"></div><div class="modal-actions"><button id="resultOk" class="result-ok">OK</button></div></div></div>
 
+<!-- 豪華バッジコレクション -->
 <div id="badgeModal" class="badge-modal hidden">
   <div class="badge-panel">
-    <h2 class="badge-title">🏆 バッジコレクション</h2>
-    <div class="badge-subtitle">── タイムクリア＆スペシャルバッジ ──</div>
-    <div class="badge-section"><div class="badge-section-title">── タイムクリアバッジ ──</div><div id="timeBadgeGrid" class="badge-grid"></div></div>
-    <div class="badge-section"><div class="badge-section-title">── スペシャルバッジ ──</div><div id="specialBadgeGrid" class="badge-grid"></div></div>
-    <button id="badgeClose" class="badge-close">閉じる</button>
+    <div class="badge-head"><div class="badge-title">🏆 バッジコレクション</div><button id="badgeCloseX" class="badge-close-x">×</button></div>
+    <div class="badge-tabs"><button class="badge-tab active" data-badge-tab="time">タイムクリア</button><button class="badge-tab" data-badge-tab="special">スペシャル</button><button class="badge-tab" data-badge-tab="all">すべて</button></div>
+    <div id="badgeContent"></div>
+    <div class="badge-footer"><button id="badgeClose">👑 閉じる</button></div>
   </div>
 </div>
 <div id="badgeToast" class="badge-toast hidden"></div>
 
 <script>
-const THEMES={blue:{bg:"#f5eedf",board:"#fffaf0",user:"#b9ddec",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#4e9bc1",line:"#88aaba",soft:"#d9eaf0",success:"#a9d9b9",danger:"#e9a2a2"},green:{bg:"#f5eedf",board:"#fffaf0",user:"#b9dfc3",pencil:"#d8c8ed",hint:"#efb0b0",answer:"#f1db91",accent:"#5ea47a",line:"#8eaf9c",soft:"#dcecdf",success:"#a9d9b9",danger:"#e9a2a2"},purple:{bg:"#f5eedf",board:"#fffaf0",user:"#c5dff0",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#8b71b2",line:"#9e91b5",soft:"#e6def0",success:"#b8d9c4",danger:"#e9a2a2"},mono:{bg:"#eeeeeb",board:"#fafaf8",user:"#cbd5d9",pencil:"#d9d9d9",hint:"#d7b4b4",answer:"#e2d39a",accent:"#71828b",line:"#87969d",soft:"#e0e5e7",success:"#b8cbbd",danger:"#dfb1b1"}};
-let difficulty=localStorage.getItem("npDifficulty")||"normal",themeName=localStorage.getItem("npTheme")||"blue",solution=[],puzzle=[],board=[];
-let types=Array.from({length:9},()=>Array(9).fill("")),pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
+const THEMES={
+blue:{bg:"#f5eedf",board:"#fffaf0",user:"#b9ddec",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#4e9bc1",line:"#88aaba",soft:"#d9eaf0",success:"#a9d9b9",danger:"#e9a2a2"},
+green:{bg:"#f5eedf",board:"#fffaf0",user:"#b9dfc3",pencil:"#d8c8ed",hint:"#efb0b0",answer:"#f1db91",accent:"#5ea47a",line:"#8eaf9c",soft:"#dcecdf",success:"#a9d9b9",danger:"#e9a2a2"},
+purple:{bg:"#f5eedf",board:"#fffaf0",user:"#c5dff0",pencil:"#d9c4ef",hint:"#efb0b0",answer:"#f1db91",accent:"#8b71b2",line:"#9e91b5",soft:"#e6def0",success:"#b8d9c4",danger:"#e9a2a2"},
+mono:{bg:"#eeeeeb",board:"#fafaf8",user:"#cbd5d9",pencil:"#d9d9d9",hint:"#d7b4b4",answer:"#e2d39a",accent:"#71828b",line:"#87969d",soft:"#e0e5e7",success:"#b8cbbd",danger:"#dfb1b1"}
+};
+let difficulty=localStorage.getItem("npDifficulty")||"normal",themeName=localStorage.getItem("npTheme")||"blue";
+let solution=[],puzzle=[],board=[],types=Array.from({length:9},()=>Array(9).fill(""));
+let pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
 let selectedNumber=null,clearMode=false,pencilMode=false,mistakeCount=0,hintCount=0,answerMode=false,finished=false,seconds=0,timerId=null;
 const sudoku=document.getElementById("sudoku"),msg=document.getElementById("message");
 
-function applyTheme(name){themeName=name;localStorage.setItem("npTheme",name);const t=THEMES[name];for(const[k,v]of Object.entries(t))document.documentElement.style.setProperty("--"+k,v);document.querySelectorAll(".theme").forEach(b=>b.classList.toggle("active",b.dataset.theme===name))}
+function applyTheme(name){themeName=name;localStorage.setItem("npTheme",name);for(const[k,v]of Object.entries(THEMES[name]))document.documentElement.style.setProperty("--"+k,v);document.querySelectorAll(".theme").forEach(b=>b.classList.toggle("active",b.dataset.theme===name))}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function candidates(g,r,c){const used=new Set();for(let i=0;i<9;i++){if(g[r][i])used.add(g[r][i]);if(g[i][c])used.add(g[i][c])}const sr=Math.floor(r/3)*3,sc=Math.floor(c/3)*3;for(let rr=sr;rr<sr+3;rr++)for(let cc=sc;cc<sc+3;cc++)if(g[rr][cc])used.add(g[rr][cc]);return[1,2,3,4,5,6,7,8,9].filter(n=>!used.has(n))}
 function makeSolution(){const g=Array.from({length:9},()=>Array(9).fill(0));function solve(){let br=-1,bc=-1,best=null;for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(g[r][c])continue;const cs=candidates(g,r,c);if(!cs.length)return false;if(!best||cs.length<best.length){br=r;bc=c;best=cs}}if(!best)return true;for(const n of shuffle(best)){g[br][bc]=n;if(solve())return true;g[br][bc]=0}return false}solve();return g}
 function countSolutions(g,limit=2){let count=0;function solve(){if(count>=limit)return;let br=-1,bc=-1,best=null;for(let r=0;r<9;r++)for(let c=0;c<9;c++){if(g[r][c])continue;const cs=candidates(g,r,c);if(!cs.length)return;if(!best||cs.length<best.length){br=r;bc=c;best=cs}}if(!best){count++;return}for(const n of best){g[br][bc]=n;solve();g[br][bc]=0;if(count>=limit)return}}solve();return count}
-function generatePuzzle(){const remove={easy:34,normal:44,hard:50}[difficulty];for(let attempt=0;attempt<10;attempt++){const solved=makeSolution(),p=solved.map(r=>[...r]);let removed=0;for(const pos of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(removed>=remove)break;const[r,c]=pos,old=p[r][c];p[r][c]=0;if(countSolutions(p.map(r=>[...r]))===1)removed++;else p[r][c]=old}if(removed>=remove){solution=solved;puzzle=p;return}}solution=makeSolution();puzzle=solution.map(r=>[...r]);let fallbackRemoved=0;for(const[r,c]of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(fallbackRemoved>=remove)break;puzzle[r][c]=0;fallbackRemoved++}}
+function generatePuzzle(){const remove={easy:34,normal:44,hard:50}[difficulty];for(let attempt=0;attempt<10;attempt++){const solved=makeSolution(),p=solved.map(r=>[...r]);let removed=0;for(const[r,c]of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(removed>=remove)break;const old=p[r][c];p[r][c]=0;if(countSolutions(p.map(r=>[...r]))===1)removed++;else p[r][c]=old}if(removed>=remove){solution=solved;puzzle=p;return}}solution=makeSolution();puzzle=solution.map(r=>[...r]);let n=0;for(const[r,c]of shuffle(Array.from({length:81},(_,i)=>[Math.floor(i/9),i%9]))){if(n++>=remove)break;puzzle[r][c]=0}}
 function resetSelection(){selectedNumber=null;clearMode=false;document.querySelectorAll("[data-number]").forEach(b=>b.classList.remove("selected"));document.getElementById("clearButton").classList.remove("selected")}
 function render(){sudoku.innerHTML="";for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement("div");cell.className="cell";if(c===2||c===5)cell.classList.add("br");if(r===2||r===5)cell.classList.add("bb");if(puzzle[r][c]){cell.textContent=puzzle[r][c];cell.classList.add("fixed")}else if(board[r][c]){cell.textContent=board[r][c];if(types[r][c])cell.classList.add(types[r][c])}else if(pencilCandidates[r][c].size){const grid=document.createElement("div");grid.className="candidate-grid";for(let n=1;n<=9;n++){const span=document.createElement("span");if(pencilCandidates[r][c].has(n))span.textContent=n;else span.className="empty";grid.appendChild(span)}cell.appendChild(grid);cell.classList.add("pencil")}cell.addEventListener("click",()=>tapCell(r,c,cell));sudoku.appendChild(cell)}}
 function tapCell(r,c,cell){if(puzzle[r][c]||finished||answerMode)return;document.querySelectorAll(".cell.selected").forEach(x=>x.classList.remove("selected"));cell.classList.add("selected");if(clearMode){board[r][c]=0;types[r][c]="";pencilCandidates[r][c].clear();render();return}if(selectedNumber!==null){if(pencilMode){if(board[r][c])return;const set=pencilCandidates[r][c];if(set.has(selectedNumber))set.delete(selectedNumber);else set.add(selectedNumber);render();return}if(board[r][c]===selectedNumber&&types[r][c]==="user"){board[r][c]=0;types[r][c]=""}else{board[r][c]=selectedNumber;types[r][c]="user";pencilCandidates[r][c].clear()}render();checkComplete()}}
@@ -121,7 +213,7 @@ function selectClear(){selectedNumber=null;clearMode=true;document.querySelector
 function togglePencil(){pencilMode=!pencilMode;if(!pencilMode)selectedNumber=null;const b=document.getElementById("pencilButton");b.classList.toggle("on",pencilMode);b.textContent=pencilMode?"✏️ 仮置き ON":"✏️ 仮置き OFF"}
 function useHint(){if(finished||answerMode||hintCount>=5)return;const empty=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])empty.push([r,c]);if(!empty.length){checkComplete();return}const[r,c]=empty[Math.floor(Math.random()*empty.length)];board[r][c]=solution[r][c];types[r][c]="hint";pencilCandidates[r][c].clear();hintCount++;updateStatus();render();if(hintCount>=5)document.getElementById("answerButton").classList.remove("hidden")}
 function updateStatus(){document.getElementById("hintCount").textContent=hintCount;document.getElementById("hintRemain").textContent="残り"+(5-hintCount)+"回"}
-function checkComplete(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])return;let wrong=0;for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(board[r][c]!==solution[r][c])wrong++;if(wrong===0)finish(true);else{mistakeCount++;showResult(false,wrong)}}
+function checkComplete(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]&&!board[r][c])return;let wrong=0;for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(board[r][c]!==solution[r][c])wrong++;if(wrong===0)finish(true);else showResult(false,wrong)}
 function finish(correct){finished=true;stopTimer();showResult(true,0);if(correct)evaluateBadges()}
 function showResult(correct,wrong){const icon=document.getElementById("resultIcon"),title=document.getElementById("resultTitle"),text=document.getElementById("resultText"),ok=document.getElementById("resultOk");if(correct){icon.textContent="🎉";title.textContent="正解！";text.innerHTML=`すべてのマスが正しく埋まりました！<br><strong>クリアタイム　${formatTime(seconds)}</strong><br>ヒント使用回数　${hintCount} / 5`;ok.className="result-ok"}else{icon.textContent="❌";title.textContent=`あと ${wrong} 個違います`;text.innerHTML="間違っているマスを確認して、もう一度挑戦してみましょう。";ok.className="result-ng";document.querySelectorAll(".cell").forEach((cell,i)=>{const r=Math.floor(i/9),c=i%9;if(!puzzle[r][c]&&board[r][c]&&board[r][c]!==solution[r][c])cell.classList.add("wrong")})}document.getElementById("resultModal").classList.remove("hidden")}
 function openAnswer(){if(!answerMode){answerMode=true;for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!puzzle[r][c]){board[r][c]=solution[r][c];types[r][c]="answer";pencilCandidates[r][c].clear()}render()}else{for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(types[r][c]==="answer"){board[r][c]=0;types[r][c]=""}answerMode=false;render()}}
@@ -129,43 +221,57 @@ function startTimer(){stopTimer();timerId=setInterval(()=>{if(!finished&&!answer
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
 function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
 function newGame(){document.getElementById("confirmModal").classList.remove("hidden")}
-function actuallyNewGame(){document.getElementById("confirmModal").classList.add("hidden");finished=false;answerMode=false;hintCount=0;mistakeCount=0;seconds=0;resetSelection();types=Array.from({length:9},()=>Array(9).fill(""));pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));board=[];generatePuzzle();board=puzzle.map(r=>[...r]);document.getElementById("answerButton").classList.add("hidden");document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer()}
+function actuallyNewGame(){document.getElementById("confirmModal").classList.add("hidden");finished=false;answerMode=false;hintCount=0;seconds=0;mistakeCount=0;resetSelection();types=Array.from({length:9},()=>Array(9).fill(""));pencilCandidates=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));board=[];generatePuzzle();board=puzzle.map(r=>[...r]);document.getElementById("answerButton").classList.add("hidden");document.getElementById("timer").textContent="00:00";updateStatus();render();startTimer()}
 function setDifficulty(level){difficulty=level;localStorage.setItem("npDifficulty",level);document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===level));actuallyNewGame()}
-function openModal(id){document.getElementById(id).classList.remove("hidden")}
-function closeModal(id){document.getElementById(id).classList.add("hidden")}
+function openModal(id){document.getElementById(id).classList.remove("hidden")}function closeModal(id){document.getElementById(id).classList.add("hidden")}
 
+document.querySelectorAll("[data-number]").forEach(b=>b.addEventListener("click",()=>selectNumber(+b.dataset.number)));
+document.getElementById("clearButton").addEventListener("click",selectClear);document.getElementById("hintButton").addEventListener("click",useHint);document.getElementById("pencilButton").addEventListener("click",togglePencil);document.getElementById("newGameButton").addEventListener("click",newGame);document.getElementById("answerButton").addEventListener("click",openAnswer);
+document.getElementById("settingsOpen").addEventListener("click",()=>openModal("settingsModal"));document.getElementById("rulesOpen").addEventListener("click",()=>openModal("rulesModal"));document.getElementById("confirmNo").addEventListener("click",()=>closeModal("confirmModal"));document.getElementById("confirmYes").addEventListener("click",actuallyNewGame);
+document.getElementById("resultOk").addEventListener("click",()=>{closeModal("resultModal");document.querySelectorAll(".wrong").forEach(x=>x.classList.remove("wrong"))});
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));document.querySelectorAll(".difficulty button").forEach(b=>b.addEventListener("click",()=>setDifficulty(b.dataset.level)));document.querySelectorAll(".theme").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.theme)));
+document.getElementById("defaultDifficulty").value=difficulty;document.getElementById("defaultDifficulty").addEventListener("change",e=>{difficulty=e.target.value;localStorage.setItem("npDifficulty",difficulty)});applyTheme(themeName);document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));
+
+/* ===== バッジシステム ===== */
 const BADGES=[
-{id:"easy10",icon:"🥉",metal:"bronze",name:"初級ブロンズ",condition:"初級を10分以内でクリア"},
-{id:"easy7",icon:"🥈",metal:"silver",name:"初級シルバー",condition:"初級を7分以内でクリア"},
-{id:"easy5",icon:"🥇",metal:"gold",name:"初級ゴールド",condition:"初級を5分以内でクリア"},
-{id:"easy3",icon:"💎",metal:"platinum",name:"初級プラチナ",condition:"初級を3分以内でクリア"},
-{id:"normal15",icon:"🥉",metal:"bronze",name:"中級ブロンズ",condition:"中級を15分以内でクリア"},
-{id:"normal10",icon:"🥈",metal:"silver",name:"中級シルバー",condition:"中級を10分以内でクリア"},
-{id:"normal7",icon:"🥇",metal:"gold",name:"中級ゴールド",condition:"中級を7分以内でクリア"},
-{id:"normal5",icon:"💎",metal:"platinum",name:"中級プラチナ",condition:"中級を5分以内でクリア"},
-{id:"hard25",icon:"🥉",metal:"bronze",name:"上級ブロンズ",condition:"上級を25分以内でクリア"},
-{id:"hard18",icon:"🥈",metal:"silver",name:"上級シルバー",condition:"上級を18分以内でクリア"},
-{id:"hard12",icon:"🥇",metal:"gold",name:"上級ゴールド",condition:"上級を12分以内でクリア"},
-{id:"hard8",icon:"💎",metal:"platinum",name:"上級プラチナ",condition:"上級を8分以内でクリア"},
-{id:"perfect",icon:"🎯",metal:"gold",name:"パーフェクト",condition:"ミス0回・ヒント0回でクリア"},
-{id:"speed",icon:"⚡",metal:"platinum",name:"スピードスター",condition:"5分以内にクリア"},
-{id:"nohint",icon:"💡",metal:"gold",name:"ノーヒント",condition:"ヒント0回でクリア"},
-{id:"pencilmaster",icon:"✏️",metal:"purple",name:"仮置きマスター",condition:"仮置きを使ってクリア"},
-{id:"streak3",icon:"🔥",metal:"bronze",name:"連勝クリア",condition:"3問連続でクリア"},
-{id:"complete",icon:"👑",metal:"platinum",name:"完全制覇",condition:"全種類のタイムバッジを獲得"}
+{id:"easy10",rank:"ブロンズ",limit:10,diff:"easy",icon:"1 2 3",condition:"初級を10分以内でクリア",style:"bronze"},
+{id:"easy7",rank:"シルバー",limit:7,diff:"easy",icon:"4 5 6",condition:"初級を7分以内でクリア",style:"silver"},
+{id:"easy5",rank:"ゴールド",limit:5,diff:"easy",icon:"7 8 9",condition:"初級を5分以内でクリア",style:"gold"},
+{id:"easy3",rank:"プラチナ",limit:3,diff:"easy",icon:"1 2 3",condition:"初級を3分以内でクリア",style:"platinum"},
+{id:"normal15",rank:"ブロンズ",limit:15,diff:"normal",icon:"1 2 3",condition:"中級を15分以内でクリア",style:"bronze"},
+{id:"normal10",rank:"シルバー",limit:10,diff:"normal",icon:"4 5 6",condition:"中級を10分以内でクリア",style:"silver"},
+{id:"normal7",rank:"ゴールド",limit:7,diff:"normal",icon:"7 8 9",condition:"中級を7分以内でクリア",style:"gold"},
+{id:"normal5",rank:"プラチナ",limit:5,diff:"normal",icon:"1 2 3",condition:"中級を5分以内でクリア",style:"platinum"},
+{id:"hard25",rank:"ブロンズ",limit:25,diff:"hard",icon:"1 2 3",condition:"上級を25分以内でクリア",style:"bronze"},
+{id:"hard18",rank:"シルバー",limit:18,diff:"hard",icon:"4 5 6",condition:"上級を18分以内でクリア",style:"silver"},
+{id:"hard12",rank:"ゴールド",limit:12,diff:"hard",icon:"7 8 9",condition:"上級を12分以内でクリア",style:"gold"},
+{id:"hard8",rank:"プラチナ",limit:8,diff:"hard",icon:"1 2 3",condition:"上級を8分以内でクリア",style:"platinum"},
+{id:"perfect",rank:"パーフェクト",condition:"ミス0回・ヒント0回でクリア",style:"gold",special:"🎯"},
+{id:"speed",rank:"スピードスター",condition:"5分以内にクリア",style:"platinum",special:"⚡"},
+{id:"streak3",rank:"3連勝",condition:"3問連続でクリア",style:"gold",special:"🔥"}
 ];
 function getBadges(){try{return JSON.parse(localStorage.getItem("sudokuBadges")||"[]")}catch(e){return[]}}
 function saveBadges(a){localStorage.setItem("sudokuBadges",JSON.stringify(a))}
 function getWinStreak(){return Number(localStorage.getItem("sudokuWinStreak")||0)}
 function setWinStreak(n){localStorage.setItem("sudokuWinStreak",String(n))}
-function renderBadgeCard(b,earned){return `<div class="badge-card ${earned?"earned":"locked"}"><div class="medal ${earned?b.metal:"locked"}"><div class="medal-ribbon ${b.metal==="purple"?"purple":b.metal==="platinum"?"blue":""}"></div><div class="medal-icon">${earned?b.icon:"🔒"}</div></div><div class="medal-name">${earned?b.name:"？？？"}</div><div class="condition">${b.condition}</div></div>`}
-function renderBadges(){const earned=getBadges();const time=BADGES.slice(0,12),special=BADGES.slice(12);document.getElementById("timeBadgeGrid").innerHTML=time.map(b=>renderBadgeCard(b,earned.includes(b.id))).join("");document.getElementById("specialBadgeGrid").innerHTML=special.map(b=>renderBadgeCard(b,earned.includes(b.id))).join("")}
-function showBadgeToast(newBadges){if(!newBadges.length)return;const names=newBadges.map(id=>{const b=BADGES.find(x=>x.id===id);return b?`${b.icon} ${b.name}`:""}).filter(Boolean);const toast=document.getElementById("badgeToast");toast.innerHTML=`🎉 新しいバッジを獲得！<br>${names.join("<br>")}`;toast.classList.remove("hidden");setTimeout(()=>toast.classList.add("hidden"),3500)}
-function evaluateBadges(){const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};if(difficulty==="easy"){if(mins<=10)add("easy10");if(mins<=7)add("easy7");if(mins<=5)add("easy5");if(mins<=3)add("easy3")}if(difficulty==="normal"){if(mins<=15)add("normal15");if(mins<=10)add("normal10");if(mins<=7)add("normal7");if(mins<=5)add("normal5")}if(difficulty==="hard"){if(mins<=25)add("hard25");if(mins<=18)add("hard18");if(mins<=12)add("hard12");if(mins<=8)add("hard8")}if(hintCount===0&&mistakeCount===0)add("perfect");if(mins<=5)add("speed");if(hintCount===0)add("nohint");if(pencilMode)add("pencilmaster");const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");const allTime=["easy10","easy7","easy5","easy3","normal15","normal10","normal7","normal5","hard25","hard18","hard12","hard8"];if(allTime.every(id=>earned.includes(id)))add("complete");saveBadges(earned);renderBadges();showBadgeToast(newly)}
+function badgeMedal(b,earned){if(b.special){return `<div class="medal ${b.style}"><div class="medal-shield"><div class="medal-inner"><span class="special-symbol">${earned?b.special:"🔒"}</span><small>SUDOKU</small></div></div></div>`}return `<div class="medal ${b.style}"><div class="medal-shield"><div class="medal-inner"><div class="nums">${earned?b.icon:"?"}</div><small>SUDOKU</small></div></div>${earned?'<span class="earned-check">✓</span>':""}</div>`}
+function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
+function guideRow(name,cls,vals){return `<div class="guide-row ${cls}"><strong>${name}</strong>${vals.map(v=>`<span>${v}</span>`).join("")}</div>`}
+function renderTime(){const times=getBadgeStats().best;const groups=[["easy","初級","easy",["10分","7分","5分","3分"]],["normal","中級","normal",["15分","10分","7分","5分"]],["hard","上級","hard",["25分","18分","12分","8分"]]];let cards=[];for(const[,name,diff]){const bs=BADGES.filter(b=>b.diff===diff);cards.push(...bs.map(renderBadgeCard))}return `<div class="badge-section-title">タイムクリアバッジ</div><div class="time-badges">${cards.join("")}</div><div class="badge-section-title">難易度ごとの目安タイム（例）</div><div class="time-guide">${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}</div>`}
+function renderSpecial(){const bs=BADGES.filter(b=>b.special);return `<div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div>`}
+function renderAll(){return renderTime()+renderSpecial()+renderStats()}
+function getBadgeStats(){try{return JSON.parse(localStorage.getItem("sudokuBadgeStats")||'{"best":null,"clears":0}')}catch(e){return{best:null,clears:0}}}
+function renderStats(){const s=getBadgeStats(),best=s.best==null?"--:--":formatTime(s.best);return `<div class="stats"><div class="stat"><div class="stat-label">⏱ 最速タイム</div><div class="stat-value">${best}</div></div><div class="stat"><div class="stat-label">👑 クリア回数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">🏆 総クリア数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">⭐ 獲得バッジ</div><div class="stat-value">${getBadges().length} / ${BADGES.length}</div></div></div>`}
+function evaluateBadges(){const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};for(const b of BADGES){if(!b.diff)continue;if(b.diff===difficulty&&mins<=b.limit)add(b.id)}if(hintCount===0&&mistakeCount===0)add("perfect");if(mins<=5)add("speed");const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");saveBadges(earned);const old=getBadgeStats(),best=old.best==null?seconds:Math.min(old.best,seconds);localStorage.setItem("sudokuBadgeStats",JSON.stringify({best,clears:(old.clears||0)+1}));showBadgeToast(newly)}
+function showBadgeToast(ids){if(!ids.length)return;const names=ids.map(id=>{const b=BADGES.find(x=>x.id===id);return b?`🏆 ${b.rank}「${b.condition}」`:""}).filter(Boolean);const t=document.getElementById("badgeToast");t.innerHTML=`🎉 バッジ獲得！<br>${names.join("<br>")}`;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),3500)}
+function renderBadges(tab="time"){const c=document.getElementById("badgeContent");c.innerHTML=tab==="time"?renderTime():tab==="special"?renderSpecial():renderAll();document.querySelectorAll(".badge-tab").forEach(b=>b.classList.toggle("active",b.dataset.badgeTab===tab))}
+document.getElementById("badgeOpen").addEventListener("click",()=>{renderBadges("time");document.getElementById("badgeModal").classList.remove("hidden")});
+document.getElementById("badgeClose").addEventListener("click",()=>document.getElementById("badgeModal").classList.add("hidden"));
+document.getElementById("badgeCloseX").addEventListener("click",()=>document.getElementById("badgeModal").classList.add("hidden"));
+document.getElementById("badgeModal").addEventListener("click",e=>{if(e.target.id==="badgeModal")e.target.classList.add("hidden")});
+document.querySelectorAll(".badge-tab").forEach(b=>b.addEventListener("click",()=>renderBadges(b.dataset.badgeTab)));
 
-document.querySelectorAll("[data-number]").forEach(b=>b.addEventListener("click",()=>selectNumber(+b.dataset.number)));
-document.getElementById("clearButton").addEventListener("click",selectClear);document.getElementById("hintButton").addEventListener("click",useHint);document.getElementById("pencilButton").addEventListener("click",togglePencil);document.getElementById("newGameButton").addEventListener("click",newGame);document.getElementById("answerButton").addEventListener("click",openAnswer);document.getElementById("settingsOpen").addEventListener("click",()=>openModal("settingsModal"));document.getElementById("rulesOpen").addEventListener("click",()=>openModal("rulesModal"));document.getElementById("confirmNo").addEventListener("click",()=>closeModal("confirmModal"));document.getElementById("confirmYes").addEventListener("click",actuallyNewGame);document.getElementById("resultOk").addEventListener("click",()=>{closeModal("resultModal");document.querySelectorAll(".wrong").forEach(x=>x.classList.remove("wrong"))});document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal(b.dataset.close)));document.querySelectorAll(".difficulty button").forEach(b=>b.addEventListener("click",()=>setDifficulty(b.dataset.level)));document.querySelectorAll(".theme").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.theme)));document.getElementById("defaultDifficulty").value=difficulty;document.getElementById("defaultDifficulty").addEventListener("change",e=>{difficulty=e.target.value;localStorage.setItem("npDifficulty",difficulty)});document.getElementById("badgeOpen").addEventListener("click",()=>{renderBadges();document.getElementById("badgeModal").classList.remove("hidden")});document.getElementById("badgeClose").addEventListener("click",()=>document.getElementById("badgeModal").classList.add("hidden"));document.getElementById("badgeModal").addEventListener("click",e=>{if(e.target.id==="badgeModal")e.target.classList.add("hidden")});
-applyTheme(themeName);document.querySelectorAll(".difficulty button").forEach(b=>b.classList.toggle("active",b.dataset.level===difficulty));actuallyNewGame();
+actuallyNewGame();
 </script>
 </body>
 </html>
