@@ -59,66 +59,71 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
 .candidate-grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);align-items:center;justify-items:center;font-size:clamp(8px,2.2vw,13px);line-height:1;color:#4f7482;font-weight:700;pointer-events:none}
 .candidate-grid span{display:flex;align-items:center;justify-content:center;width:100%;height:100%}.candidate-grid span.empty{visibility:hidden}
 .badge-open{width:100%;margin-top:5px;min-height:34px;border-radius:10px;background:#e8dfc9;color:#4d5b50;font-weight:700}
-.badge-modal{position:fixed;inset:0;background:rgba(39,31,22,.48);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:7px}
+.badge-modal{position:fixed;inset:0;background:rgba(2,7,10,.78);display:flex;align-items:center;justify-content:center;z-index:1000;padding:10px}
 .badge-modal.hidden{display:none}
-.badge-panel{width:min(820px,97vw);max-height:95vh;overflow:auto;position:relative;color:#4b4038;background:radial-gradient(circle at 12% 5%,rgba(255,255,255,.95),transparent 22%),radial-gradient(circle at 90% 10%,rgba(255,226,120,.30),transparent 20%),linear-gradient(145deg,#fffaf0,#fff4dc 52%,#fffaf2);border:3px solid #e4b94f;border-radius:24px;padding:13px;box-shadow:0 18px 60px rgba(72,52,22,.32),inset 0 0 0 2px rgba(255,255,255,.75)}
-.badge-panel:before{content:"";position:absolute;inset:6px;border:1px dashed rgba(205,153,41,.55);border-radius:18px;pointer-events:none}
-.badge-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 5px 9px;position:relative;z-index:1}
-.badge-title{font-size:clamp(21px,5vw,31px);font-weight:900;letter-spacing:1px;color:#7a4b14;text-shadow:0 2px 0 #fff}
-.badge-subtitle{font-size:11px;color:#8f7a65;margin-top:2px}
-.badge-close-x{width:40px;height:40px;border-radius:14px;background:#fff;border:2px solid #e1c47a;color:#8a6230;font-size:23px;box-shadow:0 3px 8px rgba(120,80,20,.12)}
-.badge-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;position:relative;z-index:1}
-.badge-tab{min-height:39px;border:2px solid #ead8b1;border-radius:13px;background:#fffdf8;color:#77685a;font-weight:900;box-shadow:0 2px 5px rgba(100,70,30,.08)}
-.badge-tab.active{background:linear-gradient(180deg,#ffe99b,#f6ca58);color:#70470e;border-color:#d6a52d;box-shadow:0 4px 10px rgba(198,145,28,.22)}
-.badge-section{border:2px solid #ead39b;border-radius:16px;padding:9px;margin:9px 0;background:rgba(255,255,255,.56)}
-.badge-section-title{text-align:center;color:#7a4c12;font-weight:900;font-size:17px;margin:2px 0 8px;letter-spacing:.8px}
-.badge-section-title:before,.badge-section-title:after{content:"✦";margin:0 9px;color:#e3a928}
+.badge-panel{
+  width:min(760px,96vw);max-height:92vh;overflow:auto;position:relative;
+  color:#eee;background:
+    radial-gradient(circle at 50% -20%,rgba(255,215,80,.12),transparent 38%),
+    linear-gradient(145deg,#11161a,#05090b 55%,#101417);
+  border:1px solid #8f6b20;border-radius:18px;padding:14px;
+  box-shadow:0 0 0 1px rgba(255,205,70,.12),0 18px 60px rgba(0,0,0,.65),inset 0 0 40px rgba(0,0,0,.5);
+}
+.badge-panel:before{content:"";position:absolute;inset:5px;border:1px solid rgba(207,159,43,.35);border-radius:14px;pointer-events:none}
+.badge-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 10px;position:relative;z-index:1}
+.badge-title{font-size:clamp(20px,5vw,30px);font-weight:900;letter-spacing:2px;color:#f2d77b;text-shadow:0 1px 10px rgba(255,203,64,.25)}
+.badge-close-x{width:36px;height:36px;border-radius:9px;background:#151c20;border:1px solid #8f6b20;color:#f5d477;font-size:22px}
+.badge-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px;position:relative;z-index:1}
+.badge-tab{min-height:36px;border:1px solid #55451f;border-radius:8px;background:#0c1215;color:#bbb;font-weight:800}
+.badge-tab.active{background:linear-gradient(#6c4c0c,#2e2208);color:#ffe28a;border-color:#c79a35;box-shadow:0 0 12px rgba(219,170,55,.15)}
+.badge-section-title{text-align:center;color:#e8c65b;font-weight:900;font-size:17px;margin:10px 0 7px;letter-spacing:1px}
+.badge-section-title:before,.badge-section-title:after{content:"✦";margin:0 10px;color:#d9aa37}
 .time-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-.badge-card{position:relative;overflow:hidden;min-width:0;text-align:center;padding:8px 5px 7px;border:2px solid #e7d4ac;border-radius:15px;background:linear-gradient(180deg,#fffefa,#fff6e7);box-shadow:0 4px 9px rgba(91,63,25,.10)}
-.badge-card:after{content:"✦  ✧  ✦";position:absolute;left:5px;right:5px;top:3px;color:rgba(231,174,48,.22);font-size:10px;pointer-events:none}
-.badge-card.locked{filter:saturate(.15);opacity:.66}
-.badge-card .rank{font-size:12px;font-weight:900;color:#5c4a3b}
-.badge-card .condition{font-size:9px;color:#786a5d;margin-top:2px;min-height:22px}
-.medal{width:94px;height:103px;margin:3px auto 2px;position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 5px 5px rgba(74,47,16,.24))}
-.medal .medal-ribbon{position:absolute;top:0;left:50%;transform:translateX(-50%);width:31px;height:30px;z-index:1}
-.medal .medal-ribbon:before,.medal .medal-ribbon:after{content:"";position:absolute;top:0;width:13px;height:29px;background:linear-gradient(90deg,#cf3e3e,#ff8b7a,#cf3e3e)}
-.medal .medal-ribbon:before{left:1px;clip-path:polygon(0 0,100% 0,82% 100%,0 82%)}.medal .medal-ribbon:after{right:1px;clip-path:polygon(0 0,100% 0,100% 82%,18% 100%)}
-.medal .laurel{position:absolute;top:26px;left:50%;width:92px;height:68px;transform:translateX(-50%);z-index:0;color:#cda33e}
-.medal .laurel:before,.medal .laurel:after{content:"";position:absolute;top:7px;width:43px;height:54px;border:4px solid currentColor;border-top-color:transparent;border-right-color:transparent;border-radius:50%;opacity:.9}
-.medal .laurel:before{left:0;transform:rotate(34deg)}.medal .laurel:after{right:0;transform:scaleX(-1) rotate(34deg)}
-.medal .medal-shield{top:18px;width:70px;height:70px;z-index:2;clip-path:polygon(50% 0,88% 11%,100% 42%,82% 80%,50% 100%,18% 80%,0 42%,12% 11%);border:0;box-shadow:0 0 0 3px rgba(255,255,255,.7),0 4px 8px rgba(68,45,16,.22)}
-.medal .medal-inner{width:58px;height:58px;clip-path:polygon(50% 0,88% 11%,100% 42%,82% 80%,50% 100%,18% 80%,0 42%,12% 11%);border:0;position:relative}
-.medal .medal-inner:before{content:"★";position:absolute;top:3px;right:6px;font-size:11px;color:rgba(255,255,255,.9)}
-.medal .nums{font-family:Georgia,"Times New Roman",serif;font-size:10px!important;letter-spacing:1.2px!important;padding:4px!important;border:1px solid rgba(255,255,255,.7);border-radius:5px;background:rgba(255,255,255,.48)}
-.medal .medal-inner small{font-size:7px!important;letter-spacing:1.2px!important;margin-top:2px}
-.medal.bronze .medal-shield{background:linear-gradient(145deg,#ffe4bc,#c16d2c 35%,#8b3d16 62%,#efb46d)}.medal.bronze .medal-inner{background:linear-gradient(145deg,#ffdca8,#b65e20 58%,#71300f);color:#351507}
-.medal.silver .medal-shield{background:linear-gradient(145deg,#fff,#c9d4da 35%,#83929b 62%,#f8ffff)}.medal.silver .medal-inner{background:linear-gradient(145deg,#fdfefe,#b7c5cc 58%,#6f7c83);color:#253039}
-.medal.gold .medal-shield{background:linear-gradient(145deg,#fff2a8,#e0a31d 35%,#b56b00 62%,#ffe36c)}.medal.gold .medal-inner{background:linear-gradient(145deg,#fff3a8,#e3a51c 58%,#a65e00);color:#4b2b00}
-.medal.platinum .medal-shield{background:linear-gradient(145deg,#fff,#b9ecff 30%,#6c9ee5 60%,#e9dcff)}.medal.platinum .medal-inner{background:linear-gradient(145deg,#eefcff,#8bbfe8 55%,#6f61c2);color:#16234b}
-.medal.legend .medal-shield{background:linear-gradient(145deg,#fff0fb,#eaa2ff 28%,#a66bd8 60%,#ffd3f6)}.medal.legend .medal-inner{background:linear-gradient(145deg,#fff0fb,#c786eb 55%,#7948a8);color:#fff}
-.earned-check{position:absolute;right:2px;bottom:2px;width:24px;height:24px;border-radius:50%;background:linear-gradient(#a7ef68,#55bb28);color:#17420d;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(55,110,20,.28)}
-.badge-time{font-size:10px;color:#4d9c24;font-weight:900;min-height:16px}.badge-time.lock{color:#9a8f83}
-.special-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.special-card .medal{width:82px;height:91px}.special-card .medal .medal-shield{top:16px;width:61px;height:61px}.special-card .medal .medal-inner{width:51px;height:51px}
-.special-symbol{font-size:25px;text-shadow:0 2px 3px rgba(60,40,20,.3)}
-.best-title{text-align:center;font-size:15px;font-weight:900;color:#7a4c12;margin:3px 0 6px}.best-title:before,.best-title:after{content:"✦";margin:0 7px;color:#e3a928}
-.best-times{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 9px}
-.best-card{text-align:center;padding:9px 5px 8px;border-radius:15px;background:#fff;border:2px solid #e7d3a5;box-shadow:0 4px 9px rgba(90,60,20,.09)}
-.best-card.easy{border-color:#a9dc72;background:linear-gradient(180deg,#fbfff6,#f4ffe9)}.best-card.normal{border-color:#83c6ee;background:linear-gradient(180deg,#fbfdff,#edf8ff)}.best-card.hard{border-color:#c9a0e9;background:linear-gradient(180deg,#fffaff,#f6efff)}
-.best-label{font-size:12px;font-weight:900}.best-card.easy .best-label{color:#4e9325}.best-card.normal .best-label{color:#277bb0}.best-card.hard .best-label{color:#7c45a9}
-.best-value{font-size:24px;font-weight:950;letter-spacing:1px;margin-top:2px}.best-caption{font-size:9px;color:#8b7b6a}
-.time-guide{margin-top:8px;border:1px solid #e5d2a7;border-radius:11px;padding:7px;background:#fffaf0}
-.guide-row{display:grid;grid-template-columns:42px repeat(5,1fr);gap:4px;font-size:8px;padding:4px 2px;border-bottom:1px solid #eee0c5;text-align:center}.guide-row:last-child{border-bottom:0}
-.guide-row strong{font-size:10px}.guide-row.easy strong{color:#58a52d}.guide-row.normal strong{color:#d88b18}.guide-row.hard strong{color:#d94b5c}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:9px;border:1px solid #e5d2a7;border-radius:11px;padding:7px;background:#fffaf0}
-.stat{text-align:center;border:1px solid #eadcc0;border-radius:8px;padding:4px}.stat-label{font-size:9px;color:#8a7b6c}.stat-value{font-size:15px;color:#b07818;font-weight:900;margin-top:1px}
-.badge-footer{display:flex;justify-content:center;margin-top:10px}.badge-footer button{min-width:150px;min-height:39px;border-radius:13px;background:linear-gradient(180deg,#ffe9a0,#f4c64e);border:2px solid #d6a32b;color:#6c470d;font-weight:900}
-@media(max-width:600px){.badge-panel{padding:9px}.time-badges{grid-template-columns:repeat(2,1fr);gap:5px}.badge-card{padding:6px 3px}.medal{width:82px;height:91px}.medal .medal-shield{width:62px;height:62px}.medal .medal-inner{width:51px;height:51px}.badge-card .rank{font-size:11px}.badge-card .condition{font-size:8px}.badge-time{font-size:9px}.special-badges{grid-template-columns:repeat(2,1fr);gap:5px}.special-card .medal{width:72px;height:82px}.special-card .medal .medal-shield{width:56px;height:56px}.special-card .medal .medal-inner{width:47px;height:47px}.best-times{gap:5px}.best-card{padding:7px 3px}.best-label{font-size:10px}.best-value{font-size:20px}.best-caption{font-size:8px}.guide-row{font-size:7px;grid-template-columns:31px repeat(5,1fr)}.guide-row strong{font-size:8px}}
-@media(max-width:380px){.best-times{grid-template-columns:1fr}.time-badges{grid-template-columns:repeat(2,1fr)}.special-badges{grid-template-columns:repeat(2,1fr)}}
+.badge-card{background:linear-gradient(145deg,#11181b,#080c0e);border:1px solid #5c491f;border-radius:10px;padding:7px 5px;text-align:center;min-width:0;box-shadow:inset 0 0 16px rgba(0,0,0,.55)}
+.badge-card.locked{filter:saturate(.18);opacity:.62}.badge-card .rank{font-size:12px;font-weight:900}.badge-card .condition{font-size:10px;color:#ddd;margin-top:2px}
+.medal{
+  width:86px;height:96px;margin:4px auto 3px;position:relative;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.55));
+}
+.medal:before{content:"";position:absolute;top:0;width:27px;height:23px;border-radius:4px 4px 8px 8px;background:linear-gradient(90deg,#631a12,#f06b36 50%,#741a13);box-shadow:0 2px 3px #000}
+.medal-shield{position:absolute;top:16px;width:70px;height:67px;clip-path:polygon(50% 0,92% 16%,92% 62%,50% 100%,8% 62%,8% 16%);display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#fff,#777 30%,#222 58%,#eee 82%,#555);box-shadow:0 0 0 3px #222}
+.medal-inner{width:58px;height:55px;clip-path:polygon(50% 0,92% 16%,92% 62%,50% 100%,8% 62%,8% 16%);background:linear-gradient(145deg,#eee,#999 42%,#333 65%,#ddd);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#111;font-weight:900}
+.medal-inner .nums{font-size:10px;line-height:1.2;letter-spacing:2px;background:rgba(255,255,255,.65);padding:3px;border-radius:3px}.medal-inner small{font-size:8px;letter-spacing:1px}
+.medal.bronze .medal-shield{background:linear-gradient(145deg,#fff2cf,#8d4b1c 28%,#2b1208 55%,#e8a65a 80%,#6d2d0d)}.medal.bronze .medal-inner{background:linear-gradient(145deg,#ffd99c,#8d4b1c 60%,#4d1d08);color:#241207}
+.medal.silver .medal-shield{background:linear-gradient(145deg,#fff,#8b949b 32%,#222 55%,#f4f7f8 80%,#5b646a)}.medal.silver .medal-inner{background:linear-gradient(145deg,#fff,#8f999f 55%,#42484d);color:#111}
+.medal.gold .medal-shield{background:linear-gradient(145deg,#fff2a8,#b87800 28%,#4a2600 55%,#ffd94f 80%,#8a4f00)}.medal.gold .medal-inner{background:linear-gradient(145deg,#fff1a1,#d18b00 55%,#7c4100);color:#271600}
+.medal.platinum .medal-shield{background:linear-gradient(145deg,#fff,#74bce7 25%,#273f5a 55%,#dff6ff 80%,#5f91b5)}.medal.platinum .medal-inner{background:linear-gradient(145deg,#dff8ff,#77a8c5 55%,#34566f);color:#10202b}
+.medal.legend .medal-shield{background:linear-gradient(145deg,#fff0a2,#7d42d8 27%,#1d0c38 55%,#f0a8ff 80%,#5e239f)}.medal.legend .medal-inner{background:linear-gradient(145deg,#f4d6ff,#7039a5 55%,#28103d);color:#fff}
+.earned-check{position:absolute;right:4px;bottom:4px;width:21px;height:21px;border-radius:50%;background:#7ed13d;color:#071108;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #0a130a}
+.badge-time{font-size:11px;color:#9be63c;font-weight:900;min-height:17px}
+.badge-time.lock{color:#aaa}
+.time-guide{margin-top:9px;border:1px solid #55451f;border-radius:9px;padding:7px;background:rgba(0,0,0,.25)}
+.guide-row{display:grid;grid-template-columns:42px repeat(5,1fr);gap:4px;font-size:9px;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.08);text-align:center}.guide-row:last-child{border-bottom:0}
+.guide-row strong{font-size:10px}.guide-row.easy strong{color:#8edb3c}.guide-row.normal strong{color:#ffb52e}.guide-row.hard strong{color:#ff5c52}
+.special-badges{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.special-card .medal{width:70px;height:78px}.special-card .medal:before{height:19px;width:23px}.special-card .medal-shield{top:13px;width:58px;height:57px}.special-card .medal-inner{width:48px;height:46px}
+.special-symbol{font-size:22px;text-shadow:0 2px 3px #000}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px;border:1px solid #55451f;border-radius:9px;padding:7px;background:#090e10}
+.stat{text-align:center;border-right:1px solid #3b321d}.stat:last-child{border-right:0}.stat-label{font-size:9px;color:#bbb}.stat-value{font-size:16px;color:#f0d05c;font-weight:900;margin-top:2px}
+.badge-footer{display:flex;justify-content:center;margin-top:10px}.badge-footer button{min-width:140px;min-height:38px;border-radius:9px;background:linear-gradient(#342b18,#15120c);border:1px solid #9e7624;color:#f5d57a;font-weight:900}
+@media(max-width:600px){
+  .badge-modal{padding:7px}.badge-panel{width:100%;max-height:94vh;padding:10px;border-radius:15px}
+  .time-badges{grid-template-columns:repeat(4,1fr);gap:4px}.badge-card{padding:5px 2px}.medal{width:64px;height:76px}.medal:before{width:21px;height:19px}.medal-shield{top:13px;width:54px;height:55px}.medal-inner{width:45px;height:44px}.medal-inner .nums{font-size:8px}.medal-inner small{font-size:6px}.badge-card .rank{font-size:10px}.badge-card .condition{font-size:8px}.badge-time{font-size:9px}
+  .special-badges{grid-template-columns:repeat(4,1fr);gap:4px}.special-card .medal{width:60px;height:70px}.special-card .medal-shield{width:51px;height:51px}.special-card .medal-inner{width:43px;height:41px}
+  .stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid #3b321d;padding-bottom:4px}
+  .guide-row{font-size:8px;grid-template-columns:34px repeat(5,1fr)}.guide-row strong{font-size:9px}
+}
+@media(max-width:380px){
+  .time-badges{grid-template-columns:repeat(4,1fr)}.special-badges{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-height:760px){
+  .app{padding-top:4px}.header{margin-bottom:4px}.title-main{font-size:23px}.title-sub{font-size:12px}.difficulty{margin-bottom:5px}.difficulty button{min-height:30px}
+  .number-panel{margin-top:5px;gap:5px}.number-panel button{min-height:37px}.action-grid{margin-top:5px}.action-grid button{min-height:39px}.status{margin-top:3px}.legend{display:none}
+}
 .badge-toast{position:fixed;left:50%;top:12%;transform:translateX(-50%);z-index:1100;width:min(340px,88vw);padding:16px;border-radius:16px;background:#171d20;border:1px solid #d0a43b;color:#ffe18a;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.55);font-weight:900}
 .badge-toast.hidden{display:none}
 
-/* ===== 第6号：プレミアムメダル演出 ===== */
+/* ===== 第7号：ポップ＆プレミアムメダル演出 ===== */
 .badge-panel{background:radial-gradient(circle at 50% 0%,rgba(255,215,100,.16),transparent 28%),radial-gradient(circle at 0% 45%,rgba(70,130,255,.06),transparent 25%),linear-gradient(145deg,#11171b 0%,#05080a 48%,#0d1215 100%)}
 .badge-panel:after{content:"";position:absolute;inset:0;border-radius:18px;pointer-events:none;background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.035) 45%,transparent 55%);opacity:.8}
 .badge-section{border:1px solid rgba(179,137,42,.55);border-radius:12px;padding:8px;background:linear-gradient(180deg,rgba(255,210,80,.025),rgba(0,0,0,.18));box-shadow:inset 0 0 22px rgba(0,0,0,.35)}
@@ -295,67 +300,25 @@ function badgeMedal(b,earned){
 }
 function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${b.special?"special-card ":""}${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
 function guideRow(name,cls,vals){return `<div class="guide-row ${cls}"><strong>${name}</strong>${vals.map(v=>`<span>${v}</span>`).join("")}</div>`}
-function getBadgeStats(){
-  try{
-    const s=JSON.parse(localStorage.getItem("sudokuBadgeStats")||"{}");
-    return {bestByDiff:s.bestByDiff||{easy:null,normal:null,hard:null},clears:s.clears||0};
-  }catch(e){return {bestByDiff:{easy:null,normal:null,hard:null},clears:0}}
-}
-function saveBadgeStats(s){localStorage.setItem("sudokuBadgeStats",JSON.stringify(s))}
-function renderBestTimes(){
-  const b=getBadgeStats().bestByDiff||{};
-  const v=x=>x==null?"--:--":formatTime(x);
-  return `<div class="best-title">自己ベストタイム</div><div class="best-times">
-    <div class="best-card easy"><div class="best-label">🌱 初級</div><div class="best-value">${v(b.easy)}</div><div class="best-caption">BEST TIME</div></div>
-    <div class="best-card normal"><div class="best-label">🔷 中級</div><div class="best-value">${v(b.normal)}</div><div class="best-caption">BEST TIME</div></div>
-    <div class="best-card hard"><div class="best-label">⭐ 上級</div><div class="best-value">${v(b.hard)}</div><div class="best-caption">BEST TIME</div></div>
-  </div>`;
-}
 function renderTime(){
-  const groups=[["easy","🌱 初級"],["normal","🔷 中級"],["hard","⭐ 上級"]];
-  return renderBestTimes()+groups.map(([diff,name])=>{
-    const bs=BADGES.filter(b=>b.diff===diff);
-    return `<div class="badge-section"><div class="badge-section-title">タイムクリアバッジ（${name}）</div><div class="time-badges">${bs.map(renderBadgeCard).join("")}</div></div>`;
-  }).join("");
+  const bs=BADGES.filter(b=>b.diff);
+  const cards=bs.map(renderBadgeCard).join("");
+  return `<div class="badge-section-title">タイムクリアバッジ</div>
+    <div class="time-badges">${cards}</div>
+    <div class="badge-section-title">難易度ごとの目安タイム（例）</div>
+    <div class="time-guide">
+      ${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}
+      ${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}
+      ${guideRow("上級","hard",["ブロンズ 25分","シルバー 18分","ゴールド 12分","プラチナ 8分","—"])}
+    </div>`;
 }
-function renderSpecial(){
-  const bs=BADGES.filter(b=>b.special);
-  return `<div class="badge-section"><div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div></div>`;
-}
-function renderStats(){
-  const s=getBadgeStats();
-  return `<div class="stats"><div class="stat"><div class="stat-label">👑 総クリア数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">🏆 獲得バッジ</div><div class="stat-value">${getBadges().length} / ${BADGES.length}</div></div></div>`;
-}
-function renderAll(){return renderBestTimes()+renderTime().replace(renderBestTimes(),"")+renderSpecial()+renderStats()}
-function evaluateBadges(){
-  const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};
-  for(const b of BADGES){if(b.diff&&b.diff===difficulty&&mins<=b.limit)add(b.id)}
-  if(hintCount===0&&mistakeCount===0)add("perfect");
-  if(mins<=5)add("speed");
-  if(usedPencil)add("pencilmaster");
-  if(hintCount===0)add("nohint");
-  const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");
-  const gold={easy:"easy5",normal:"normal7",hard:"hard12"};
-  const afterGold=[...earned];
-  if(afterGold.includes(gold.easy)&&afterGold.includes(gold.normal)&&afterGold.includes(gold.hard))add("complete");
-  saveBadges(earned);
-
-  const old=getBadgeStats();
-  const bestByDiff={easy:old.bestByDiff?.easy??null,normal:old.bestByDiff?.normal??null,hard:old.bestByDiff?.hard??null};
-  bestByDiff[difficulty]=bestByDiff[difficulty]==null?seconds:Math.min(bestByDiff[difficulty],seconds);
-  saveBadgeStats({bestByDiff,clears:(old.clears||0)+1});
-  showBadgeToast(newly);
-}
-function showBadgeToast(ids){
-  if(!ids.length)return;
-  const names=ids.map(id=>{const b=BADGES.find(x=>x.id===id);return b?`🏆 ${b.rank}「${b.condition}」`:""}).filter(Boolean);
-  const t=document.getElementById("badgeToast");t.innerHTML=`🎉 バッジ獲得！<br>${names.join("<br>")}`;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),3500);
-}
-function renderBadges(tab="time"){
-  const c=document.getElementById("badgeContent");
-  c.innerHTML=tab==="time"?renderTime():tab==="special"?renderSpecial():renderAll();
-  document.querySelectorAll(".badge-tab").forEach(b=>b.classList.toggle("active",b.dataset.badgeTab===tab));
-}
+function renderSpecial(){const bs=BADGES.filter(b=>b.special);return `<div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div>`}
+function renderAll(){return renderTime()+renderSpecial()+renderStats()}
+function getBadgeStats(){try{return JSON.parse(localStorage.getItem("sudokuBadgeStats")||'{"best":null,"clears":0}')}catch(e){return{best:null,clears:0}}}
+function renderStats(){const s=getBadgeStats(),best=s.best==null?"--:--":formatTime(s.best);return `<div class="stats"><div class="stat"><div class="stat-label">⏱ 最速タイム</div><div class="stat-value">${best}</div></div><div class="stat"><div class="stat-label">👑 クリア回数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">🏆 総クリア数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">⭐ 獲得バッジ</div><div class="stat-value">${getBadges().length} / ${BADGES.length}</div></div></div>`}
+function evaluateBadges(){const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};for(const b of BADGES){if(!b.diff)continue;if(b.diff===difficulty&&mins<=b.limit)add(b.id)}if(hintCount===0&&mistakeCount===0)add("perfect");if(mins<=5)add("speed");const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");saveBadges(earned);const old=getBadgeStats(),best=old.best==null?seconds:Math.min(old.best,seconds);localStorage.setItem("sudokuBadgeStats",JSON.stringify({best,clears:(old.clears||0)+1}));showBadgeToast(newly)}
+function showBadgeToast(ids){if(!ids.length)return;const names=ids.map(id=>{const b=BADGES.find(x=>x.id===id);return b?`🏆 ${b.rank}「${b.condition}」`:""}).filter(Boolean);const t=document.getElementById("badgeToast");t.innerHTML=`🎉 バッジ獲得！<br>${names.join("<br>")}`;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),3500)}
+function renderBadges(tab="time"){const c=document.getElementById("badgeContent");c.innerHTML=tab==="time"?renderTime():tab==="special"?renderSpecial():renderAll();document.querySelectorAll(".badge-tab").forEach(b=>b.classList.toggle("active",b.dataset.badgeTab===tab))}
 document.getElementById("badgeOpen").addEventListener("click",()=>{renderBadges("time");document.getElementById("badgeModal").classList.remove("hidden")});
 document.getElementById("badgeClose").addEventListener("click",()=>document.getElementById("badgeModal").classList.add("hidden"));
 document.getElementById("badgeCloseX").addEventListener("click",()=>document.getElementById("badgeModal").classList.add("hidden"));
