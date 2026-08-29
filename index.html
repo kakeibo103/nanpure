@@ -76,6 +76,17 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
 .badge-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:10px;position:relative;z-index:1}
 .badge-tab{min-height:36px;border:1px solid #55451f;border-radius:8px;background:#0c1215;color:#bbb;font-weight:800}
 .badge-tab.active{background:linear-gradient(#6c4c0c,#2e2208);color:#ffe28a;border-color:#c79a35;box-shadow:0 0 12px rgba(219,170,55,.15)}
+
+.best-title{text-align:center;color:#f2d77b;font-weight:900;font-size:18px;margin:4px 0 7px;letter-spacing:1px}
+.best-times{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.best-card{border:1px solid #5c491f;border-radius:10px;padding:7px 4px;text-align:center;background:linear-gradient(145deg,#171d20,#090d0f);box-shadow:inset 0 0 14px rgba(0,0,0,.45)}
+.best-label{font-size:12px;font-weight:900}
+.best-value{font-size:22px;font-weight:900;line-height:1.1;margin-top:3px;color:#f4d76d;text-shadow:0 0 8px rgba(255,210,70,.18)}
+.best-caption{font-size:7px;letter-spacing:1px;color:#aaa;margin-top:2px}
+.best-card.easy .best-label{color:#8edb3c}
+.best-card.normal .best-label{color:#ffb52e}
+.best-card.hard .best-label{color:#ff6b63}
+
 .badge-section-title{text-align:center;color:#e8c65b;font-weight:900;font-size:17px;margin:10px 0 7px;letter-spacing:1px}
 .badge-section-title:before,.badge-section-title:after{content:"✦";margin:0 10px;color:#d9aa37}
 .time-badges{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
@@ -108,6 +119,7 @@ button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;-webkit-ta
 .badge-footer{display:flex;justify-content:center;margin-top:10px}.badge-footer button{min-width:140px;min-height:38px;border-radius:9px;background:linear-gradient(#342b18,#15120c);border:1px solid #9e7624;color:#f5d57a;font-weight:900}
 @media(max-width:600px){
   .badge-modal{padding:7px}.badge-panel{width:100%;max-height:94vh;padding:10px;border-radius:15px}
+  .best-times{grid-template-columns:repeat(3,1fr);gap:4px}.best-card{padding:6px 2px}.best-label{font-size:10px}.best-value{font-size:16px}.best-caption{font-size:6px}
   .time-badges{grid-template-columns:repeat(4,1fr);gap:4px}.badge-card{padding:5px 2px}.medal{width:64px;height:76px}.medal:before{width:21px;height:19px}.medal-shield{top:13px;width:54px;height:55px}.medal-inner{width:45px;height:44px}.medal-inner .nums{font-size:8px}.medal-inner small{font-size:6px}.badge-card .rank{font-size:10px}.badge-card .condition{font-size:8px}.badge-time{font-size:9px}
   .special-badges{grid-template-columns:repeat(4,1fr);gap:4px}.special-card .medal{width:60px;height:70px}.special-card .medal-shield{width:51px;height:51px}.special-card .medal-inner{width:43px;height:41px}
   .stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid #3b321d;padding-bottom:4px}
@@ -300,12 +312,25 @@ function badgeMedal(b,earned){
 }
 function renderBadgeCard(b){const earned=getBadges().includes(b.id);return `<div class="badge-card ${b.special?"special-card ":""}${earned?"":"locked"}"><div class="rank">${b.rank}</div><div class="condition">${b.limit?b.limit+"分以内":b.condition}</div>${badgeMedal(b,earned)}<div class="badge-time ${earned?"":"lock"}">${earned?"獲得済み":"未達成"}</div></div>`}
 function guideRow(name,cls,vals){return `<div class="guide-row ${cls}"><strong>${name}</strong>${vals.map(v=>`<span>${v}</span>`).join("")}</div>`}
+function renderBestTimes(){
+  const s=getBadgeStats();
+  const b=s.bestByDiff||{easy:null,normal:null,hard:null};
+  const v=x=>x==null?"--:--":formatTime(x);
+  return `<div class="best-title">🏆 自己ベストタイム</div>
+    <div class="best-times">
+      <div class="best-card easy"><div class="best-label">🌱 初級</div><div class="best-value">${v(b.easy)}</div><div class="best-caption">BEST TIME</div></div>
+      <div class="best-card normal"><div class="best-label">🔷 中級</div><div class="best-value">${v(b.normal)}</div><div class="best-caption">BEST TIME</div></div>
+      <div class="best-card hard"><div class="best-label">⭐ 上級</div><div class="best-value">${v(b.hard)}</div><div class="best-caption">BEST TIME</div></div>
+    </div>`;
+}
 function renderTime(){
-  const bs=BADGES.filter(b=>b.diff);
-  const cards=bs.map(renderBadgeCard).join("");
-  return `<div class="badge-section-title">タイムクリアバッジ</div>
-    <div class="time-badges">${cards}</div>
-    <div class="badge-section-title">難易度ごとの目安タイム（例）</div>
+  const groups=[["easy","🌱 初級"],["normal","🔷 中級"],["hard","⭐ 上級"]];
+  return renderBestTimes()+groups.map(([diff,name])=>{
+    const bs=BADGES.filter(b=>b.diff===diff);
+    return `<div class="badge-section-title">タイムクリアバッジ（${name}）</div>
+      <div class="time-badges">${bs.map(renderBadgeCard).join("")}</div>`;
+  }).join("")+
+    `<div class="badge-section-title">難易度ごとの目安タイム（例）</div>
     <div class="time-guide">
       ${guideRow("初級","easy",["ブロンズ 10分","シルバー 7分","ゴールド 5分","プラチナ 3分","—"])}
       ${guideRow("中級","normal",["ブロンズ 15分","シルバー 10分","ゴールド 7分","プラチナ 5分","—"])}
@@ -314,9 +339,36 @@ function renderTime(){
 }
 function renderSpecial(){const bs=BADGES.filter(b=>b.special);return `<div class="badge-section-title">スペシャルバッジ</div><div class="special-badges">${bs.map(renderBadgeCard).join("")}</div>`}
 function renderAll(){return renderTime()+renderSpecial()+renderStats()}
-function getBadgeStats(){try{return JSON.parse(localStorage.getItem("sudokuBadgeStats")||'{"best":null,"clears":0}')}catch(e){return{best:null,clears:0}}}
-function renderStats(){const s=getBadgeStats(),best=s.best==null?"--:--":formatTime(s.best);return `<div class="stats"><div class="stat"><div class="stat-label">⏱ 最速タイム</div><div class="stat-value">${best}</div></div><div class="stat"><div class="stat-label">👑 クリア回数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">🏆 総クリア数</div><div class="stat-value">${s.clears}</div></div><div class="stat"><div class="stat-label">⭐ 獲得バッジ</div><div class="stat-value">${getBadges().length} / ${BADGES.length}</div></div></div>`}
-function evaluateBadges(){const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};for(const b of BADGES){if(!b.diff)continue;if(b.diff===difficulty&&mins<=b.limit)add(b.id)}if(hintCount===0&&mistakeCount===0)add("perfect");if(mins<=5)add("speed");const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");saveBadges(earned);const old=getBadgeStats(),best=old.best==null?seconds:Math.min(old.best,seconds);localStorage.setItem("sudokuBadgeStats",JSON.stringify({best,clears:(old.clears||0)+1}));showBadgeToast(newly)}
+function getBadgeStats(){
+  try{
+    const s=JSON.parse(localStorage.getItem("sudokuBadgeStats")||"{}");
+    if(s.bestByDiff){
+      return {bestByDiff:{
+        easy:s.bestByDiff.easy??null,
+        normal:s.bestByDiff.normal??null,
+        hard:s.bestByDiff.hard??null
+      },clears:s.clears||0};
+    }
+    // 旧バージョンの「全体最速」データがあれば保持
+    return {bestByDiff:{easy:null,normal:null,hard:null},clears:s.clears||0};
+  }catch(e){
+    return {bestByDiff:{easy:null,normal:null,hard:null},clears:0};
+  }
+}
+function saveBadgeStats(s){localStorage.setItem("sudokuBadgeStats",JSON.stringify(s))}
+function renderStats(){
+  const s=getBadgeStats();
+  return `<div class="stats">
+    <div class="stat"><div class="stat-label">👑 総クリア数</div><div class="stat-value">${s.clears}</div></div>
+    <div class="stat"><div class="stat-label">🏆 獲得バッジ</div><div class="stat-value">${getBadges().length} / ${BADGES.length}</div></div>
+  </div>`;
+}
+function evaluateBadges(){const mins=seconds/60,earned=getBadges(),newly=[],add=id=>{if(!earned.includes(id)){earned.push(id);newly.push(id)}};for(const b of BADGES){if(!b.diff)continue;if(b.diff===difficulty&&mins<=b.limit)add(b.id)}if(hintCount===0&&mistakeCount===0)add("perfect");if(mins<=5)add("speed");const streak=getWinStreak()+1;setWinStreak(streak);if(streak>=3)add("streak3");saveBadges(earned);
+  const old=getBadgeStats();
+  const bestByDiff={...old.bestByDiff};
+  bestByDiff[difficulty]=bestByDiff[difficulty]==null?seconds:Math.min(bestByDiff[difficulty],seconds);
+  saveBadgeStats({bestByDiff,clears:(old.clears||0)+1});
+  showBadgeToast(newly)}
 function showBadgeToast(ids){if(!ids.length)return;const names=ids.map(id=>{const b=BADGES.find(x=>x.id===id);return b?`🏆 ${b.rank}「${b.condition}」`:""}).filter(Boolean);const t=document.getElementById("badgeToast");t.innerHTML=`🎉 バッジ獲得！<br>${names.join("<br>")}`;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),3500)}
 function renderBadges(tab="time"){const c=document.getElementById("badgeContent");c.innerHTML=tab==="time"?renderTime():tab==="special"?renderSpecial():renderAll();document.querySelectorAll(".badge-tab").forEach(b=>b.classList.toggle("active",b.dataset.badgeTab===tab))}
 document.getElementById("badgeOpen").addEventListener("click",()=>{renderBadges("time");document.getElementById("badgeModal").classList.remove("hidden")});
